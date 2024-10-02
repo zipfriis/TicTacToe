@@ -56,28 +56,6 @@ COLOR_CROSSED = "\033[9m"
 # Reset to default colors
 COLOR_RESET = "\033[0m"
 
-class Player:
-    def __init__(self, Name: str, Icon: str) -> None:
-        self.Name = Name
-        self.Icon = Icon
-
-
-class Board:
-    Spaces: list[list[bool]] = [[False, False, False],
-                                [False, False, False],
-                                [False, False, False]]
-
-
-class Game:
-    Players: list[Player] # usealy just to people, but this could be fun later if 
-    # Spaces contain ht einfoamation how a players board is filled out
-   
-    
-    def PrintBoard(self):
-       for x in self.Spaces:
-           if x != 0:
-               print("fuck you")
-
 # moves the cursor, to a location in the terminal
 def movecursor(y, x):
     print("\033[%d;%dH" % (y, x), end="")
