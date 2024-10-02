@@ -87,10 +87,50 @@ def WipeScreen():
     print(" " * os.get_terminal_size().columns * os.get_terminal_size().lines, end="")
     movecursor(0,0)
 
-def AskForMove(BoardLoacations: list[list[int]], Width, Height):
-    movecursor((BoardLoacations[0][0]-7)/2+7, BoardLoacations[0][1])
-    print("Please use your arrow keys to move...")
+
+def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width, Height) -> int:
+    OutputLocation = (BoardLoacations[0][0]-7)/2+7
+    movecursor(OutputLocation, BoardLoacations[0][1])
+    print("Please Pick a Space... ", end="")
+    for x in Spaces:
+        print(str(x) + ", ", end="")
+    while True:
+        Choise = int(input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": "))
+        if Choise in Spaces:
+            break
+    # wipeping 
+    movecursor(OutputLocation, 0)
+    print(" "*Width, end="")
     movecursor(Height-1, Width)
+    return Choise
+
+def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
+    RenderIcon: list[str]
+    if Icon == "x":
+        RenderIcon = [
+            "    __  __    ",
+            "    \ \/ /    ",
+            "     \  /     ",
+            "     /  \     ",
+            "    /_/\_\    ",
+            "              ",]
+    else:
+        RenderIcon = [
+            "      ___     ",
+            "     / _ \    ",
+            "    | | | |   ",
+            "    | |_| |   ",
+            "     \___/    ",
+            "              "]
+        
+    x = BoardLocation[Choise-1]
+
+    movecursor(x[0], x[1])
+    for idx, s in enumerate(RenderIcon):
+        movecursor(x[0]+idx, x[1])
+        print(COLOR_LIGHT_RED+ s,end="")
+        print(COLOR_LIGHT_BLUE, end="")
+
     
 
 def RenderBoard(Width, Height) -> list[list[int]]:
@@ -267,9 +307,15 @@ def GameLoop():
         print("i dont supprt bot at this time, sorry")
     # Print the size of terminal
 
-    BoardSize = RenderBoard(Screen_width, Screen_Height)
+    BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
-    AskForMove(BoardSize, Screen_width, Screen_Height)
+    Spaces: list[int] = [1,2,3,4,5,6,7,8,9] 
+
+    Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+
+    RenderSelection(Choise, "o", BoardLocation)
+    movecursor(Screen_Height-1, Screen_width)
+
 
     
 
