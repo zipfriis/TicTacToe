@@ -73,8 +73,9 @@ def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width, Heigh
     for x in Spaces:
         print(str(x) + ", ", end="")
     while True:
-        Choise = int(input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": "))
-        if Choise in Spaces:
+        Choise = input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": " + " " * (Width - BoardLoacations[0][1] - 2)+ "\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1] + 2))
+        StringSpaces = map(str, Spaces)
+        if Choise in StringSpaces:
             break
     # wipeping 
     movecursor(OutputLocation, 0)
@@ -82,9 +83,53 @@ def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width, Heigh
     movecursor(Height-1, Width)
     return Choise
 
+
+def OptionMenu():
+    # This loops until player deside to player ither by another person or internal bot
+    movecursor(7,0)
+    Human = True
+    PlayersKnown: bool = False
+    while PlayersKnown == False:
+        playeramountstring = input("Do you like to play with human or bot? (h/b): ")
+        if playeramountstring == "h":
+            PlayersKnown = True
+        elif playeramountstring == "b":
+            Human = False
+            PlayersKnown = True
+        
+    if Human == True: # do something becarse human idk
+        print("hello world")
+    else:
+        print("i dont supprt bot at this time, sorry")
+    
+
+def CheckWinner(Player: list[int]) -> bool:
+    # rows
+    if Player[0] and Player[1] and Player[2]:
+        return True
+    elif Player[3] and Player[4] and Player[5]:
+        return True
+    elif Player[6] and Player[7] and Player[8]:
+        return True
+    elif Player[0] and Player[3] and Player[6]: # colums
+        return True
+    elif Player[1] and Player[4] and Player[7]:
+        return True
+    elif Player[2] and Player[5] and Player[8]:
+        return True
+    elif Player[0] and Player[4] and Player[8]:  # diangel
+        return True
+    elif Player[2] and Player[4] and Player[6]:
+        return True
+    else:
+        return False
+
+
 def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
     RenderIcon: list[str]
+    Color: str
     if Icon == "x":
+        Color = COLOR_LIGHT_RED
         RenderIcon = [
             "    __  __    ",
             "    \ \/ /    ",
@@ -93,6 +138,7 @@ def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
             "    /_/\_\    ",
             "              ",]
     else:
+        Color = COLOR_LIGHT_GREEN
         RenderIcon = [
             "      ___     ",
             "     / _ \    ",
@@ -106,7 +152,7 @@ def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
     movecursor(x[0], x[1])
     for idx, s in enumerate(RenderIcon):
         movecursor(x[0]+idx, x[1])
-        print(COLOR_LIGHT_RED+ s,end="")
+        print(Color+ s,end="")
         print(COLOR_LIGHT_BLUE, end="")
 
     
@@ -265,34 +311,41 @@ def GameLoop():
 
     PrintStartScreen(Screen_width)
     print(COLOR_CYAN, end="")
-
-    Human = True
     
-    # This loops until player deside to player ither by another person or internal bot
-    PlayersKnown: bool = False
-    movecursor(7,0)
-    while PlayersKnown == False:
-        playeramountstring = input("Do you like to play with human or bot? (h/b): ")
-        if playeramountstring == "h":
-            PlayersKnown = True
-        elif playeramountstring == "b":
-            Human = False
-            PlayersKnown = True
-        
-    if Human == True: # do something becarse human idk
-        print("hello world")
-    else:
-        print("i dont supprt bot at this time, sorry")
+    OptionMenu()
     # Print the size of terminal
 
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
-    Spaces: list[int] = [1,2,3,4,5,6,7,8,9] 
+    Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
 
-    Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Round: int = 0
+    while True:
+        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+        Choise = int(Choise)
+        # assuming that the value excict other could not be chosen, in AskForMove
+        Spaces.remove(int(Choise))
 
-    RenderSelection(Choise, "o", BoardLocation)
-    movecursor(Screen_Height-1, Screen_width)
+        Player: list[bool]
+        Icon: str = "O"
+        if Round % 2 == 0:
+            Icon = "x"
+            Player = Player1
+
+        else:
+            Icon = "O"
+            Player = Player2
+        Player[Choise-1] = True
+        RenderSelection(Choise, Icon, BoardLocation)
+        movecursor(Screen_Height-1, Screen_width)
+        win: bool = CheckWinner(Player)
+        if win:
+            exit()
+
+        Round = Round + 1
+       
 
 
     
@@ -300,4 +353,3 @@ def GameLoop():
 
 if __name__=="__main__":
     GameLoop()
- 
