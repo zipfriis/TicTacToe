@@ -60,20 +60,21 @@ COLOR_RESET = "\033[0m"
 def movecursor(y, x):
     print("\033[%d;%dH" % (y, x), end="")
 
+# basicly set cursor to wipe from and print space to fill screen
 def WipeScreen(LineStart: int):
     movecursor(LineStart,0)
     print(" " * os.get_terminal_size().columns * (os.get_terminal_size().lines - 7), end="")
     movecursor(LineStart,0)
 
 
-def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width, Height) -> int:
+def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
     OutputLocation = (BoardLoacations[0][0]-7)/2+7
     movecursor(OutputLocation, BoardLoacations[0][1])
     print("Please Pick a Space... ", end="")
     for x in Spaces:
         print(str(x) + ", ", end="")
     while True:
-        Choise = input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": " + " " * (Width - BoardLoacations[0][1] - 2)+ "\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1] + 2))
+        Choise = input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": " + (" " * int(Width - BoardLoacations[0][1] - 2))+ "\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1] + 2))
         StringSpaces = map(str, Spaces)
         if Choise in StringSpaces:
             break
@@ -145,7 +146,16 @@ def OptionMenu(Width: int, Height: int) -> int:
             print("noob")
             exit(0)
 
-    
+
+def EndMessage(Message: str, Width: int, Height: int):
+    if Message == "X Won":
+        pass
+    elif Message == "O Won":
+        pass
+    elif Message == "You Won":
+        pass
+    elif Message == "Bot Won":
+        pass
 
 def CheckWinner(Player: list[int]) -> bool:
     # rows
@@ -201,7 +211,7 @@ def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
 
     
 
-def RenderBoard(Width, Height) -> list[list[int]]:
+def RenderBoard(Width: int, Height: int) -> list[list[int]]:
     BoardStringList = [
     "┌──────────────┬──────────────┬──────────────┐\n",
     "│              │              │              │\n",
@@ -314,7 +324,65 @@ def RenderBoard(Width, Height) -> list[list[int]]:
     movecursor(Height-1,Width)
     return SpaceLoactions
 
-                                                                           
+
+def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
+    BoardStringList = [
+    "┌───┬───┬───┐ ┃ ┌───┬───┬───┐ ┃ ┌───┬───┬───┐",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "└───┴───┴───┘ ┃ └───┴───┴───┘ ┃ └───┴───┴───┘",
+    "━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━",
+    "┌───┬───┬───┐ ┃ ┌───┬───┬───┐ ┃ ┌───┬───┬───┐",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "└───┴───┴───┘ ┃ └───┴───┴───┘ ┃ └───┴───┴───┘",
+    "━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━",
+    "┌───┬───┬───┐ ┃ ┌───┬───┬───┐ ┃ ┌───┬───┬───┐",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤",
+    "│   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │",
+    "└───┴───┴───┘ ┃ └───┴───┴───┘ ┃ └───┴───┴───┘"]
+    BoardHeight = len(BoardStringList)
+    BoardWidth = len(BoardStringList[0])
+    BoardLocation: list[int] = [((Height-7 - BoardHeight)/2)+7, (Width-BoardWidth) / 2]
+    movecursor(BoardLocation[0], BoardLocation[1])
+    for idx, BoardString in enumerate(BoardStringList):
+        movecursor(((Height-7 - BoardHeight)/2)+7 + idx, (Width-BoardWidth) / 2)
+        print(COLOR_BLUE + BoardString, end="")
+    movecursor(Height-1,Width)
+
+    # Function to offset an existing board's locations
+    def offset_board_locations(base_board: list[list[int]], y_offset: int = 17, x_offset: int = 0) -> list[list[int]]:
+        return [[x + x_offset, y + y_offset] for x, y in base_board]
+    
+    # index all locations by board and hardcoded ofsets
+    Board1Location: list[list[int]] = [[BoardLocation[0]+1, BoardLocation[1]+2],[BoardLocation[0]+1, BoardLocation[1]+2+4],[BoardLocation[0]+1, BoardLocation[1]+2+8],
+                                       [BoardLocation[0]+1+2, BoardLocation[1]+2],[BoardLocation[0]+1+2, BoardLocation[1]+2+4],[BoardLocation[0]+1+2, BoardLocation[1]+2+8],
+                                       [BoardLocation[0]+1+4, BoardLocation[1]+2],[BoardLocation[0]+1+4, BoardLocation[1]+2+4],[BoardLocation[0]+1+4, BoardLocation[1]+2+8]]
+    Board2Location = offset_board_locations(Board1Location, y_offset=16)
+    Board3Location = offset_board_locations(Board2Location, y_offset=16)
+
+    # Board4Location through Board9Location add offsets based on Board1Location, Board2Location, Board3Location
+    Board4Location = offset_board_locations(Board1Location, x_offset=8, y_offset=0)
+    Board5Location = offset_board_locations(Board2Location, x_offset=8, y_offset=0)
+    Board6Location = offset_board_locations(Board3Location, x_offset=8, y_offset=0)
+
+    Board7Location = offset_board_locations(Board4Location, x_offset=8, y_offset=0)
+    Board8Location = offset_board_locations(Board5Location, x_offset=8, y_offset=0)
+    Board9Location = offset_board_locations(Board6Location, x_offset=8, y_offset=0)
+
+    return [Board1Location, Board2Location, Board3Location, Board4Location, Board5Location, Board6Location, Board7Location, Board8Location, Board9Location]
+
+
+
 
 def PrintStartScreen(Width: int):
     print(COLOR_LIGHT_BLUE, end="")
@@ -363,39 +431,92 @@ def GameLoop():
     PrintStartScreen(Screen_width)
     print(COLOR_CYAN, end="")
     
-    OptionMenu(Screen_width, Screen_Height)
+    GameMode: int # This int should only be 1,2,3,4 = freind, bot, swap friend, super tictactoe
+    GameMode = OptionMenu(Screen_width, Screen_Height)
     # Print the size of terminal
+    if GameMode == 1:
+        BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
-    BoardLocation = RenderBoard(Screen_width, Screen_Height)
+        Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
 
-    Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
+        # players board state
+        Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
+        Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+        Round: int = 0
+        while True:
+            Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+            Choise = int(Choise)
+            # assuming that the value excict other could not be chosen, in AskForMove
+            Spaces.remove(int(Choise))
 
-    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
-    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
-    Round: int = 0
-    while True:
-        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
-        Choise = int(Choise)
-        # assuming that the value excict other could not be chosen, in AskForMove
-        Spaces.remove(int(Choise))
+            Player: list[bool]
+            Icon: str = "O"
+            if Round % 2 == 0:
+                Icon = "x"
+                Player = Player1
 
-        Player: list[bool]
-        Icon: str = "O"
-        if Round % 2 == 0:
-            Icon = "x"
-            Player = Player1
+            else:
+                Icon = "O"
+                Player = Player2
+            Player[Choise-1] = True
+            RenderSelection(Choise, Icon, BoardLocation)
+            movecursor(Screen_Height-1, Screen_width)
+            win: bool = CheckWinner(Player)
+            if win:
+                if Icon == "x":
+                    EndMessage("X Won", Screen_width, Screen_Height)
+                else:
+                    EndMessage("O Won", Screen_width, Screen_Height)
+                exit()
 
-        else:
-            Icon = "O"
-            Player = Player2
-        Player[Choise-1] = True
-        RenderSelection(Choise, Icon, BoardLocation)
-        movecursor(Screen_Height-1, Screen_width)
-        win: bool = CheckWinner(Player)
-        if win:
-            exit()
+            Round = Round + 1
+    elif GameMode == 2:
+        pass
+    elif GameMode == 3:
+        pass
+    elif GameMode == 4: # this game mode is not done
+        BoardLocations: list[list[list[int]]] = RenderSuperBoard(Screen_width, Screen_Height)
 
-        Round = Round + 1
+        Spaces: list[list[int]] = [[1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9],
+                                   [1,2,3,4,5,6,7,8,9]]
+
+        # super players board state, info https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe
+        # 3x3 for each 3x3 
+        Player1: list[bool] = [[False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False]]
+        Player2: list[bool] = [[False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False]]
+        while True:
+            for x in range(9):
+                SectionBoard = BoardLocations[x]
+                for idx, t in enumerate(SectionBoard):
+                    movecursor(t[0],t[1])
+                    print(idx + 1, end= "")
+                    Choise = AskForMove(Spaces[x], SectionBoard, int(Screen_width), Screen_Height)
+
+                
+    
        
 
 
