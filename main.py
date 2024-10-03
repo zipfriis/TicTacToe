@@ -60,10 +60,10 @@ COLOR_RESET = "\033[0m"
 def movecursor(y, x):
     print("\033[%d;%dH" % (y, x), end="")
 
-def WipeScreen():
-    movecursor(0,0)
-    print(" " * os.get_terminal_size().columns * os.get_terminal_size().lines, end="")
-    movecursor(0,0)
+def WipeScreen(LineStart: int):
+    movecursor(LineStart,0)
+    print(" " * os.get_terminal_size().columns * (os.get_terminal_size().lines - 7), end="")
+    movecursor(LineStart,0)
 
 
 def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width, Height) -> int:
@@ -84,23 +84,67 @@ def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width, Heigh
     return Choise
 
 
-def OptionMenu():
+def OptionMenu(Width: int, Height: int) -> int:
     # This loops until player deside to player ither by another person or internal bot
-    movecursor(7,0)
-    Human = True
-    PlayersKnown: bool = False
-    while PlayersKnown == False:
-        playeramountstring = input("Do you like to play with human or bot? (h/b): ")
-        if playeramountstring == "h":
-            PlayersKnown = True
-        elif playeramountstring == "b":
-            Human = False
-            PlayersKnown = True
+    while True:
+        WipeScreen(7)
+        print(COLOR_BLUE, end="")
+        QuestionList = [
+        "Play with another human, assuming you actually have friends, lol. ",
+        "Challenge a bot, because... friends? Not really your thing? ",
+        "Move pieces, strategic mode... You sure you're up for this? ",
+        "Super Tic-Tac-Toe—oh, so you think you're a genius now? ",
+        "Looking for an escape route already? "]
+        QuestionListMaker = [COLOR_BLUE +"[" + COLOR_LIGHT_RED + "1" + COLOR_BLUE + "]", 
+                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "2" + COLOR_BLUE + "]",
+                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "3" + COLOR_BLUE + "]",
+                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "4" + COLOR_BLUE + "]",
+                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "Q" + COLOR_BLUE + "]"]
+
+        # This len is done to the index of the longest string
+        Longest = len(QuestionList[0]) + 2
+        LongestFirstLocationX = (Width - Longest)/2
+
+        movecursor(9,(Width-5)/2)
+        print(COLOR_BOLD + "Game Modes", end=COLOR_RESET+COLOR_BLUE)       
+        for idx, Question in enumerate(QuestionList):
+            movecursor(idx + 10, LongestFirstLocationX)
+            print(Question, end="")
+        for idx, Maker in enumerate(QuestionListMaker):
+            movecursor(idx + 10, LongestFirstLocationX + Longest)
+            print(Maker, end="")
+       
+        print(COLOR_LIGHT_RED, end="")
+        movecursor(idx+ 14, (Width-10)/2)
+        print("‾‾‾‾‾‾‾‾‾‾‾‾", end="")
+        movecursor(idx+ 13, (Width-10)/2)
+        Answer = input("Pick one: ")
+        print(COLOR_BLUE, end="")
         
-    if Human == True: # do something becarse human idk
-        print("hello world")
-    else:
-        print("i dont supprt bot at this time, sorry")
+        if Answer == "1":
+            WipeScreen(7)
+            movecursor(Height,0)
+            print( COLOR_LIGHT_PURPLE +"Friend Mode" + COLOR_BLUE, end="")
+            return 1
+        elif Answer == "2":
+            WipeScreen(7)
+            movecursor(Height,0)
+            print( COLOR_LIGHT_PURPLE +"Machine Mode" + COLOR_BLUE, end="")
+            return 2
+        elif Answer == "3":
+            WipeScreen(7)
+            movecursor(Height,0)
+            print(COLOR_LIGHT_PURPLE + "Swap Mode" + COLOR_BLUE, end="")
+            return 3
+        elif Answer == "4":
+            WipeScreen(7)
+            movecursor(Height,0)
+            print(COLOR_LIGHT_PURPLE + "Super Mode, Bot" + COLOR_BLUE, end="")
+            return 4
+        elif Answer == "q":
+            print("noob")
+            exit(0)
+
     
 
 def CheckWinner(Player: list[int]) -> bool:
@@ -290,7 +334,7 @@ def PrintStartScreen(Width: int):
         i = i + 1 
 
     ## By now nothing on the screen is printed, but wipping for making sure no shell output wont fuck with the game
-    WipeScreen()
+    WipeScreen(0)
     # after printing the string made above 
     print(WelcomeString, end="")
     print('—' * Width, end="")
@@ -300,19 +344,26 @@ def GameLoop():
     Screen_width = os.get_terminal_size().columns
     Screen_Height = os.get_terminal_size().lines
 
-    if Screen_width < 95:
-        print("The game is made in mind for the 95 width and above...")
-        print("Rezise and rerun... Thanks")
+    if Screen_width < 95 and Screen_Height < 42:
+        WipeScreen(0)
+        print("The game need 95 in width and 42 in height")
+        print("Rezise and rerun... Thanks :)")
         exit(0)
-    if Screen_Height < 42:
+    elif Screen_width < 95:
+        WipeScreen(0)
+        print("The game is made in mind for the 95 width and above...")
+        print("Rezise and rerun... Thanks :)")
+        exit(0)
+    elif Screen_Height < 42:
+        WipeScreen(0)
         print("The game is made in mind for the 42 and above in height...")
-        print("Rezise and rerun... Thanks")
+        print("Rezise and rerun... Thanks :)")
         exit(0)
 
     PrintStartScreen(Screen_width)
     print(COLOR_CYAN, end="")
     
-    OptionMenu()
+    OptionMenu(Screen_width, Screen_Height)
     # Print the size of terminal
 
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
