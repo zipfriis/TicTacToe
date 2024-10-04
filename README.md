@@ -1,3 +1,3 @@
 # TicTacToe
 Simple terminal/console game...
-[http://url/to/img.png](https://github.com/zipfriis/TicTacToe/blob/main/Screenshot%202024-10-04%20at%2016.48.25.png)
+![alt text](https://github.com/zipfriis/TicTacToe/blob/main/Screenshot%202024-10-04%20at%2016.48.25.png)
