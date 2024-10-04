@@ -1,2 +1,2 @@
 # TicTacToe
-idk
+Simple terminal/console game...
