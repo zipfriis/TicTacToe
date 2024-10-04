@@ -245,17 +245,6 @@ def CheckWinner(Player: list[bool]) -> bool:
         return False
 
 
-def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
-    RenderIcon, Color = render_icon(Icon)
-    x = BoardLocation[Choise-1]
-
-    movecursor(x[0], x[1])
-    for idx, s in enumerate(RenderIcon):
-        movecursor(x[0]+idx, x[1])
-        print(Color+ s,end="")
-        print(COLOR_LIGHT_BLUE, end="")
-
-
 def render_icon(icon_type: str) -> list[str]:
     """Returns the corresponding icon as a list of strings based on the icon type."""
     if icon_type == "x":
@@ -348,124 +337,29 @@ def render_number(num: int) -> list[str]:
     return num_list[num - 1] if 1 <= num <= 9 else []
 
 
-def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation: list[list[int]]):
-    
-    # Enforce types at runtime
-    if not isinstance(ChoiseFrom, int):
-        raise TypeError(f"ChoiseFrom must be an int, but got {type(ChoiseFrom).__name__}")
-    if not isinstance(ChoiseTo, int):
-        raise TypeError(f"ChoiseTo must be an int, but got {type(ChoiseTo).__name__}")
-    if not isinstance(Icon, str):
-        raise TypeError(f"Icon must be a str, but got {type(Icon).__name__}")
-    if not isinstance(BoardLocation, list) or not all(isinstance(sublist, list) and all(isinstance(i, int) for i in sublist) for sublist in BoardLocation):
-        raise TypeError("BoardLocation must be a list of lists of integers.")
-    
-    # Check that ChoiseFrom and ChoiseTo are within valid ranges
-    if not (1 <= ChoiseFrom <= len(BoardLocation)) or not (1 <= ChoiseTo <= len(BoardLocation)):
-        raise ValueError(f"ChoiseFrom and ChoiseTo must be within the valid range of 1 to {len(BoardLocation)}.")
-    
-
-    RenderIcon: list[str]
-    Color: str
-
-    Number1String = [
-    "       _      ",
-    "      / |     ",
-    "      | |     ",
-    "      | |     ",
-    "      |_|     "]
-
-    Number2String = [
-    "     ____     ",
-    "    |___ \    ",
-    "      __) |   ",
-    "     / __/    ",
-    "    |_____|   "]
-
-    Number3String = [
-    "     _____    ",
-    "    |___ /    ",
-    "      |_ \    ",
-    "     ___) |   ",
-    "    |____/    "]
-
-    Number4String = [
-    "     _  _     ",
-    "    | || |    ",
-    "    | || |_   ",
-    "    |__   _|  ",
-    "       |_|    "]
-
-    Number5String = [
-    "     ____     ",
-    "    | ___|    ",
-    "    |___ \    ",
-    "     ___) |   ",
-    "    |____/    "]
-
-    Number6String = [
-    "      __      ",
-    "     / /_     ",
-    "    | '_ \    ",
-    "    | (_) |   ",
-    "     \___/    "]
-
-    Number7String = [
-    "     _____    ",
-    "    |___  |   ",
-    "       / /    ",
-    "      / /     ",
-    "     /_/      "]
-
-    Number8String = [
-    "      ___     ",
-    "     ( _ )    ",
-    "     / _ \    ",
-    "    | (_) |   ",
-    "     \___/    "]
-
-    Number9String = [
-    "      ___     ",
-    "     / _ \    ",
-    "    | (_) |   ",
-    "     \__, |   ",
-    "       /_/    "]
-
-    NumList = [Number1String, Number2String, Number3String, Number4String, Number5String, Number6String, Number7String, Number8String, Number9String]
-
-    if Icon == "x":
-        Color = COLOR_LIGHT_RED
-        RenderIcon = [
-            "    __  __    ",
-            "    \ \/ /    ",
-            "     \  /     ",
-            "     /  \     ",
-            "    /_/\_\    ",
-            "              ",]
-    else:
-        Color = COLOR_LIGHT_GREEN
-        RenderIcon = [
-            "      ___     ",
-            "     / _ \    ",
-            "    | | | |   ",
-            "    | |_| |   ",
-            "     \___/    ",
-            "              "]
-
-    x: list[int] = BoardLocation[ChoiseFrom - 1]
+def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
+    RenderIcon, Color = render_icon(Icon)
+    x = BoardLocation[Choise-1]
 
     movecursor(x[0], x[1])
     for idx, s in enumerate(RenderIcon):
         movecursor(x[0]+idx, x[1])
-        print(Color + s,end="")
+        print(Color+ s,end="")
         print(COLOR_LIGHT_BLUE, end="")
+
+
+def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation: list[list[int]]):
+
+    # render new locatiton with the old functino for gamemode 1 
+    RenderSelection(ChoiseTo, Icon, BoardLocation)
     
-    x: list[int] = BoardLocation[ChoiseTo - 1]
+    x = BoardLocation[ChoiseFrom - 1]
 
     movecursor(x[0], x[1])
-    for idx, s in enumerate(NumList[ChoiseTo - 1]):
+    for idx, s in enumerate(render_number(ChoiseTo)):
         movecursor(x[0]+idx, x[1])
-        print(s,end="")
+        print(COLOR_LIGHT_BLUE+ s,end="")
+        print(COLOR_LIGHT_BLUE, end="")
     
 
 def RenderBoard(Width: int, Height: int) -> list[list[int]]:
@@ -772,7 +666,9 @@ def GameMode3(Screen_width, Screen_Height):
 
 
         FromLocation, ToLocation = AskSwap(BoardLocationsFrom, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
-    
+        Player[FromLocation-1] = False
+        Player[ToLocation-1] = True
+
         RenderSwapSelection(FromLocation, ToLocation, Icon, BoardLocation)
         movecursor(Screen_Height-1, Screen_width)
         win: bool = CheckWinner(Player)
