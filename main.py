@@ -70,7 +70,7 @@ def WipeScreen(LineStart: int):
 def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
     OutputLocation = (BoardLoacations[0][0]-7)/2+7
     movecursor(OutputLocation, BoardLoacations[0][1])
-    print("Please Pick a Space... ", end="")
+    print("(q for quit) Please Pick a Space... ", end="")
     for x in Spaces:
         print(str(x) + ", ", end="")
     while True:
@@ -78,11 +78,53 @@ def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, 
         StringSpaces = map(str, Spaces)
         if Choise in StringSpaces:
             break
+        if Choise == "q":
+            movecursor(Height-1,Width)
+            exit(0)
     # wipeping 
     movecursor(OutputLocation, 0)
     print(" "*Width, end="")
     movecursor(Height-1, Width)
     return Choise
+
+def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> list[int]:
+    OutputLocation = (BoardLoacations[0][0]-7)/2+7
+    movecursor(OutputLocation, BoardLoacations[0][1])
+    print("Please Pick a Space To Move From ", end="")
+    for x in SpacesFrom:
+        print(str(x) + ", ", end="")
+    while True:
+        ChoiseFrom = input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": " + (" " * int(Width - BoardLoacations[0][1] - 2))+ "\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1] + 2))
+        StringSpaces = map(str, SpacesFrom)
+        if ChoiseFrom in StringSpaces:
+            break
+    movecursor(OutputLocation, BoardLoacations[0][1])
+    print("Please Pick a Space To Move to ", end="")
+    
+    for x in SpacesTo:
+        print(str(x) + ", ", end="")
+    while True:
+        ChoiseTo = input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": " + (" " * int(Width - BoardLoacations[0][1] - 2))+ "\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1] + 2))
+        StringSpaces = map(str, SpacesTo)
+        if ChoiseTo in StringSpaces:
+            break
+
+    # wipeping 
+    movecursor(OutputLocation, 0)
+    print(" "*Width, end="")
+    movecursor(Height-1, Width)
+    return [ChoiseFrom, ChoiseTo]
+    
+
+def PrintCenter(StringList: list[str], Width, Height):
+    WipeScreen(7)
+    for idx, x in enumerate(StringList):
+        movecursor((Height-len(StringList))/2 + idx, (Width-len(StringList[0]))/2)
+        print(x, end="")
+    movecursor(Height-1,Width)
+            
+
+
 
 
 def OptionMenu(Width: int, Height: int) -> int:
@@ -149,15 +191,38 @@ def OptionMenu(Width: int, Height: int) -> int:
 
 def EndMessage(Message: str, Width: int, Height: int):
     if Message == "X Won":
-        pass
+        MessageString = [
+            " __  __        __     __     ______     __   __    ",
+            '/\_\_\_\      /\ \  _ \ \   /\  __ \   /\ "-.\ \   ',
+            '\/_/\_\/_     \ \ \/ ".\ \  \ \ \/\ \  \ \ \-.  \  ',
+            '  /\_\/\_\     \ \__/".~\_\  \ \_____\  \ \_\\"\_ \ ',
+            "  \/_/\/_/      \/_/   \/_/   \/_____/   \/_/ \/_/ "]
+        PrintCenter(MessageString, Width, Height)
     elif Message == "O Won":
-        pass
+        MessageString = [
+            " ______        __     __     ______     __   __    ",
+            '/\  __ \      /\ \  _ \ \   /\  __ \   /\ "-.\ \   ',
+            '\ \ \/\ \     \ \ \/ ".\ \  \ \ \/\ \  \ \ \-.  \  ',
+            ' \ \_____\     \ \__/".~\_\  \ \_____\  \ \_\\"\_\ ',
+            "  \/_____/      \/_/   \/_/   \/_____/   \/_/ \/_/ "]
+        PrintCenter(MessageString, Width, Height)
+    elif Message == "Tie":
+        # sub zero big font...
+        MessageString = [
+            ' ______   __     ______     _____    ',
+            '/\__  _\ /\ \   /\  ___\   /\  __-.  ',
+            '\/_/\ \/ \ \ \  \ \  __\   \ \ \/\ \ ',
+            '   \ \_\  \ \_\  \ \_____\  \ \____- ',
+            '    \/_/   \/_/   \/_____/   \/____/ ']
+        PrintCenter(MessageString, Width, Height)
+        
+    
     elif Message == "You Won":
         pass
     elif Message == "Bot Won":
         pass
 
-def CheckWinner(Player: list[int]) -> bool:
+def CheckWinner(Player: list[bool]) -> bool:
     # rows
     if Player[0] and Player[1] and Player[2]:
         return True
@@ -180,27 +245,7 @@ def CheckWinner(Player: list[int]) -> bool:
 
 
 def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
-    RenderIcon: list[str]
-    Color: str
-    if Icon == "x":
-        Color = COLOR_LIGHT_RED
-        RenderIcon = [
-            "    __  __    ",
-            "    \ \/ /    ",
-            "     \  /     ",
-            "     /  \     ",
-            "    /_/\_\    ",
-            "              ",]
-    else:
-        Color = COLOR_LIGHT_GREEN
-        RenderIcon = [
-            "      ___     ",
-            "     / _ \    ",
-            "    | | | |   ",
-            "    | |_| |   ",
-            "     \___/    ",
-            "              "]
-        
+    RenderIcon, Color = render_icon(Icon)
     x = BoardLocation[Choise-1]
 
     movecursor(x[0], x[1])
@@ -209,32 +254,99 @@ def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
         print(Color+ s,end="")
         print(COLOR_LIGHT_BLUE, end="")
 
-    
+def render_icon(icon_type: str) -> list[str]:
+    """Returns the corresponding icon as a list of strings based on the icon type."""
+    if icon_type == "x":
+        return [
+            "    __  __    ",
+            "    \ \/ /    ",
+            "     \  /     ",
+            "     /  \     ",
+            "    /_/\_\    ",
+            "              "
+        ], COLOR_LIGHT_RED
+    else:
+        return [
+            "      ___     ",
+            "     / _ \    ",
+            "    | | | |   ",
+            "    | |_| |   ",
+            "     \___/    ",
+            "              "
+        ], COLOR_LIGHT_GREEN
 
-def RenderBoard(Width: int, Height: int) -> list[list[int]]:
-    BoardStringList = [
-    "┌──────────────┬──────────────┬──────────────┐\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "├──────────────┼──────────────┼──────────────┤\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "├──────────────┼──────────────┼──────────────┤\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "└──────────────┴──────────────┴──────────────┘\n"]
+def render_number(num: int) -> list[str]:
+    """Returns the corresponding number as a list of strings."""
+    num_list = [
+        [
+            "       _      ",
+            "      / |     ",
+            "      | |     ",
+            "      | |     ",
+            "      |_|     "
+        ],
+        [
+            "     ____     ",
+            "    |___ \    ",
+            "      __) |   ",
+            "     / __/    ",
+            "    |_____|   "
+        ],
+        [
+            "     _____    ",
+            "    |___ /    ",
+            "      |_ \    ",
+            "     ___) |   ",
+            "    |____/    "
+        ],
+        [
+            "     _  _     ",
+            "    | || |    ",
+            "    | || |_   ",
+            "    |__   _|  ",
+            "       |_|    "
+        ],
+        [
+            "     ____     ",
+            "    | ___|    ",
+            "    |___ \    ",
+            "     ___) |   ",
+            "    |____/    "
+        ],
+        [
+            "      __      ",
+            "     / /_     ",
+            "    | '_ \    ",
+            "    | (_) |   ",
+            "     \___/    "
+        ],
+        [
+            "     _____    ",
+            "    |___  |   ",
+            "       / /    ",
+            "      / /     ",
+            "     /_/      "
+        ],
+        [
+            "      ___     ",
+            "     ( _ )    ",
+            "     / _ \    ",
+            "    | (_) |   ",
+            "     \___/    "
+        ],
+        [
+            "      ___     ",
+            "     / _ \    ",
+            "    | (_) |   ",
+            "     \__, |   ",
+            "       /_/    "
+        ]
+    ]
+    return num_list[num - 1] if 1 <= num <= 9 else []
+
+def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation: list[list[int]]):
+    RenderIcon: list[str]
+    Color: str
 
     Number1String = [
     "       _      ",
@@ -299,8 +411,68 @@ def RenderBoard(Width: int, Height: int) -> list[list[int]]:
     "     \__, |   ",
     "       /_/    "]
 
-    NumberStringList: list[list[int]] = [Number1String, Number2String, Number3String, Number4String, Number5String, Number6String, Number7String, Number8String, Number9String]
+    NumList = [Number1String, Number2String, Number3String, Number4String, Number5String, Number6String, Number7String, Number8String, Number9String]
 
+    if Icon == "x":
+        Color = COLOR_LIGHT_RED
+        RenderIcon = [
+            "    __  __    ",
+            "    \ \/ /    ",
+            "     \  /     ",
+            "     /  \     ",
+            "    /_/\_\    ",
+            "              ",]
+    else:
+        Color = COLOR_LIGHT_GREEN
+        RenderIcon = [
+            "      ___     ",
+            "     / _ \    ",
+            "    | | | |   ",
+            "    | |_| |   ",
+            "     \___/    ",
+            "              "]
+        
+    x = BoardLocation[ChoiseFrom-1]
+
+    movecursor(x[0], x[1])
+    for idx, s in enumerate(RenderIcon):
+        movecursor(x[0]+idx, x[1])
+        print(Color + s,end="")
+        print(COLOR_LIGHT_BLUE, end="")
+    
+    x = BoardLocation[ChoiseTo-1]
+
+    movecursor(x[0], x[1])
+    for idx, s in enumerate(NumList[ChoiseTo-1]):
+        movecursor(x[0]+idx, x[1])
+        print(s,end="")
+
+    
+
+def RenderBoard(Width: int, Height: int) -> list[list[int]]:
+    BoardStringList = [
+    "┌──────────────┬──────────────┬──────────────┐\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "├──────────────┼──────────────┼──────────────┤\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "├──────────────┼──────────────┼──────────────┤\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "│              │              │              │\n",
+    "└──────────────┴──────────────┴──────────────┘\n"]
 
     movecursor(7,0)
     TopSpace = ((int(Height/2))-15)
@@ -317,7 +489,7 @@ def RenderBoard(Width: int, Height: int) -> list[list[int]]:
 
     for i, x in enumerate(SpaceLoactions):
         movecursor(x[0], x[1])
-        for idx, s in enumerate(NumberStringList[i]):
+        for idx, s in enumerate(render_number(i+ 1)):
             movecursor(x[0]+idx, x[1])
             print(s,end="")
     # just setting the cursor in the corner, if it gets closed or cras, it will not nuke the text
@@ -435,44 +607,11 @@ def GameLoop():
     GameMode = OptionMenu(Screen_width, Screen_Height)
     # Print the size of terminal
     if GameMode == 1:
-        BoardLocation = RenderBoard(Screen_width, Screen_Height)
-
-        Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
-
-        # players board state
-        Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
-        Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
-        Round: int = 0
-        while True:
-            Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
-            Choise = int(Choise)
-            # assuming that the value excict other could not be chosen, in AskForMove
-            Spaces.remove(int(Choise))
-
-            Player: list[bool]
-            Icon: str = "O"
-            if Round % 2 == 0:
-                Icon = "x"
-                Player = Player1
-
-            else:
-                Icon = "O"
-                Player = Player2
-            Player[Choise-1] = True
-            RenderSelection(Choise, Icon, BoardLocation)
-            movecursor(Screen_Height-1, Screen_width)
-            win: bool = CheckWinner(Player)
-            if win:
-                if Icon == "x":
-                    EndMessage("X Won", Screen_width, Screen_Height)
-                else:
-                    EndMessage("O Won", Screen_width, Screen_Height)
-                exit()
-
-            Round = Round + 1
+        GameMode1(Screen_width, Screen_Height)
     elif GameMode == 2:
-        pass
+        PrintCenter(["Dont Have a bot programmed at this time"])
     elif GameMode == 3:
+        GameMode3(Screen_width, Screen_Height)
         pass
     elif GameMode == 4: # this game mode is not done
         BoardLocations: list[list[list[int]]] = RenderSuperBoard(Screen_width, Screen_Height)
@@ -515,13 +654,111 @@ def GameLoop():
                     print(idx + 1, end= "")
                     Choise = AskForMove(Spaces[x], SectionBoard, int(Screen_width), Screen_Height)
 
-                
+
+def GameMode1(Screen_width, Screen_Height):
+    BoardLocation = RenderBoard(Screen_width, Screen_Height)
+
+    Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
+
+    # players board state
+    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Round: int = 0
+    for x in range(9):
+        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+        Choise = int(Choise)
+        # assuming that the value excict other could not be chosen, in AskForMove
+        Spaces.remove(int(Choise))
+        Player: list[bool]
+        Icon: str = "O"
+        if Round % 2 == 0:
+            Icon = "x"
+            Player = Player1
+        else:
+            Icon = "O"
+            Player = Player2
+        Player[Choise-1] = True
+        RenderSelection(Choise, Icon, BoardLocation)
+        movecursor(Screen_Height-1, Screen_width)
+        win: bool = CheckWinner(Player)
+        if win:
+            if Icon == "x":
+                EndMessage("X Won", Screen_width, Screen_Height)
+            else:
+                EndMessage("O Won", Screen_width, Screen_Height)
+            exit()
+        Round = Round + 1
+    EndMessage("Tie", Screen_width, Screen_Height)       
     
        
+def GameMode3(Screen_width, Screen_Height):
+    BoardLocation = RenderBoard(Screen_width, Screen_Height)
+
+    Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
+
+    # players board state
+    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Round: int = 0
+    for x in range(6):
+        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+        Choise = int(Choise)
+        # assuming that the value excict other could not be chosen, in AskForMove
+        Spaces.remove(int(Choise))
+        Player: list[bool]
+        Icon: str = "O"
+        if Round % 2 == 0:
+            Icon = "x"
+            Player = Player1
+        else:
+            Icon = "O"
+            Player = Player2
+        Player[Choise-1] = True
+        RenderSelection(Choise, Icon, BoardLocation)
+        movecursor(Screen_Height-1, Screen_width)
+        win: bool = CheckWinner(Player)
+        if win:
+            if Icon == "x":
+                EndMessage("X Won", Screen_width, Screen_Height)
+            else:
+                EndMessage("O Won", Screen_width, Screen_Height)
+            exit()
+        Round = Round + 1
+    while True:
+        Player: list[bool]
+        Icon: str = "O"
+        if Round % 2 == 0:
+            Icon = "x"
+            Player = Player1
+        else:
+            Icon = "O"
+            Player = Player2
+        BoardLocationsToMove: list[int] = []
+        for idx, x in enumerate(Player):
+            if x:
+                BoardLocationsToMove.append(idx + 1)
+        
+        BoardLocationsTo: list[int] = []
+        for x in range(9):
+            if Player1[x] == False and Player2[x] == False:
+                BoardLocationsTo.append(x + 1)
 
 
-    
+        SwapChoise = AskSwap(BoardLocationsToMove, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
+        FromLocation: int = SwapChoise[0]
+        ToLocation: int = SwapChoise[1]
+        RenderSwapSelection(FromLocation, ToLocation, Icon, BoardLocation)
+        movecursor(Screen_Height-1, Screen_width)
+        win: bool = CheckWinner(Player)
+        if win:
+            if Icon == "x":
+                EndMessage("X Won", Screen_width, Screen_Height)
+            else:
+                EndMessage("O Won", Screen_width, Screen_Height)
+            exit()
+        Round = Round + 1
 
+        
 
 if __name__=="__main__":
     GameLoop()
