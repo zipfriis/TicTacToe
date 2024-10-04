@@ -87,7 +87,8 @@ def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, 
     movecursor(Height-1, Width)
     return Choise
 
-def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> list[int]:
+
+def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
     OutputLocation = (BoardLoacations[0][0]-7)/2+7
     movecursor(OutputLocation, BoardLoacations[0][1])
     print("Please Pick a Space To Move From ", end="")
@@ -113,7 +114,7 @@ def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[li
     movecursor(OutputLocation, 0)
     print(" "*Width, end="")
     movecursor(Height-1, Width)
-    return [ChoiseFrom, ChoiseTo]
+    return int(ChoiseFrom), int(ChoiseTo)
     
 
 def PrintCenter(StringList: list[str], Width, Height):
@@ -254,6 +255,7 @@ def RenderSelection(Choise: int, Icon: str, BoardLocation: list[list[int]]):
         print(Color+ s,end="")
         print(COLOR_LIGHT_BLUE, end="")
 
+
 def render_icon(icon_type: str) -> list[str]:
     """Returns the corresponding icon as a list of strings based on the icon type."""
     if icon_type == "x":
@@ -274,6 +276,7 @@ def render_icon(icon_type: str) -> list[str]:
             "     \___/    ",
             "              "
         ], COLOR_LIGHT_GREEN
+
 
 def render_number(num: int) -> list[str]:
     """Returns the corresponding number as a list of strings."""
@@ -344,7 +347,24 @@ def render_number(num: int) -> list[str]:
     ]
     return num_list[num - 1] if 1 <= num <= 9 else []
 
+
 def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation: list[list[int]]):
+    
+    # Enforce types at runtime
+    if not isinstance(ChoiseFrom, int):
+        raise TypeError(f"ChoiseFrom must be an int, but got {type(ChoiseFrom).__name__}")
+    if not isinstance(ChoiseTo, int):
+        raise TypeError(f"ChoiseTo must be an int, but got {type(ChoiseTo).__name__}")
+    if not isinstance(Icon, str):
+        raise TypeError(f"Icon must be a str, but got {type(Icon).__name__}")
+    if not isinstance(BoardLocation, list) or not all(isinstance(sublist, list) and all(isinstance(i, int) for i in sublist) for sublist in BoardLocation):
+        raise TypeError("BoardLocation must be a list of lists of integers.")
+    
+    # Check that ChoiseFrom and ChoiseTo are within valid ranges
+    if not (1 <= ChoiseFrom <= len(BoardLocation)) or not (1 <= ChoiseTo <= len(BoardLocation)):
+        raise ValueError(f"ChoiseFrom and ChoiseTo must be within the valid range of 1 to {len(BoardLocation)}.")
+    
+
     RenderIcon: list[str]
     Color: str
 
@@ -431,8 +451,8 @@ def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation
             "    | |_| |   ",
             "     \___/    ",
             "              "]
-        
-    x = BoardLocation[ChoiseFrom-1]
+
+    x: list[int] = BoardLocation[ChoiseFrom - 1]
 
     movecursor(x[0], x[1])
     for idx, s in enumerate(RenderIcon):
@@ -440,13 +460,12 @@ def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation
         print(Color + s,end="")
         print(COLOR_LIGHT_BLUE, end="")
     
-    x = BoardLocation[ChoiseTo-1]
+    x: list[int] = BoardLocation[ChoiseTo - 1]
 
     movecursor(x[0], x[1])
-    for idx, s in enumerate(NumList[ChoiseTo-1]):
+    for idx, s in enumerate(NumList[ChoiseTo - 1]):
         movecursor(x[0]+idx, x[1])
         print(s,end="")
-
     
 
 def RenderBoard(Width: int, Height: int) -> list[list[int]]:
@@ -552,8 +571,6 @@ def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
     Board9Location = offset_board_locations(Board6Location, x_offset=8, y_offset=0)
 
     return [Board1Location, Board2Location, Board3Location, Board4Location, Board5Location, Board6Location, Board7Location, Board8Location, Board9Location]
-
-
 
 
 def PrintStartScreen(Width: int):
@@ -700,6 +717,8 @@ def GameMode3(Screen_width, Screen_Height):
     Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
     Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
     Round: int = 0
+    
+    # limits the game mode 1 logic to 6 rounds... 
     for x in range(6):
         Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
         Choise = int(Choise)
@@ -724,6 +743,9 @@ def GameMode3(Screen_width, Screen_Height):
                 EndMessage("O Won", Screen_width, Screen_Height)
             exit()
         Round = Round + 1
+    
+    # now you dont tie, but continue infinitly... until someone wins the game.
+    # this logic is based upon to number number a picked... 
     while True:
         Player: list[bool]
         Icon: str = "O"
@@ -733,20 +755,24 @@ def GameMode3(Screen_width, Screen_Height):
         else:
             Icon = "O"
             Player = Player2
-        BoardLocationsToMove: list[int] = []
-        for idx, x in enumerate(Player):
-            if x:
-                BoardLocationsToMove.append(idx + 1)
         
+        # finding what number a given player owns and therfore can mode from.
+        # using the bool value list, which is normally used for checking the win condition.
+        BoardLocationsFrom: list[int] = []
+        for idx, x in enumerate(Player):
+            if x: # checking bool values (True, False) maning no compare is done here. 
+                # If location is used, will idx value + 1 be what to write... 
+                BoardLocationsFrom.append(idx + 1)
+        
+        # finding spaces which is not used.
         BoardLocationsTo: list[int] = []
-        for x in range(9):
+        for x in range(9): # there are 9 spaces, and i need both players value, so using index, for the player to check
             if Player1[x] == False and Player2[x] == False:
-                BoardLocationsTo.append(x + 1)
+                BoardLocationsTo.append(x + 1) # convert from index to real(index start from 0, not 1)
 
 
-        SwapChoise = AskSwap(BoardLocationsToMove, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
-        FromLocation: int = SwapChoise[0]
-        ToLocation: int = SwapChoise[1]
+        FromLocation, ToLocation = AskSwap(BoardLocationsFrom, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
+    
         RenderSwapSelection(FromLocation, ToLocation, Icon, BoardLocation)
         movecursor(Screen_Height-1, Screen_width)
         win: bool = CheckWinner(Player)
