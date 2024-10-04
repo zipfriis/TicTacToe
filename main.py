@@ -18,46 +18,16 @@ import os  # only get used for:     os.get_terminal_size().columns     and     o
 highlight_start = "\033[1;37;44m"  # Bright white text on blue background
 highlight_end = "\033[0m"  # Reset formatting
 
-COLOR_BLACK="\033[0;30m"
 COLOR_RED="\033[0;31m"
 COLOR_GREEN="\033[0;32m"
-COLOR_BROWN="\033[0;33m"
 COLOR_BLUE="\033[0;34m"
-COLOR_PURPLE="\033[0;35m"
 COLOR_CYAN="\033[0;36m"
-COLOR_LIGHT_GRAY="\033[0;37m"
-COLOR_DARK_GRAY="\033[1;30m"
+COLOR_YELLOW="\033[1;33m"
 COLOR_LIGHT_RED="\033[1;31m"
 COLOR_LIGHT_GREEN="\033[1;32m"
-COLOR_YELLOW="\033[1;33m"
 COLOR_LIGHT_BLUE="\033[1;34m"
 COLOR_LIGHT_PURPLE="\033[1;35m"
-COLOR_LIGHT_CYAN="\033[1;36m"
-COLOR_LIGHT_WHITE="\033[1;37m"
-COLOR_BOLD="\033[1m"
-COLOR_FAINT="\033[2m"
-COLOR_ITALIC="\033[3m"
-COLOR_UNDERLINE="\033[4m"
-COLOR_BLINK="\033[5m"
-COLOR_NEGATIVE="\033[7m"
-COLOR_CROSSED="\033[9m"
-
-BG_COLOR_BLACK = "\033[40m"
-BG_COLOR_LIGHT_GRAY = "\033[47m"
-BG_COLOR_DARK_GRAY = "\033[100m"  # ANSI code for bright black (dark gray)
-
-
-
-# Text styles (already provided, just including for reference)
 COLOR_BOLD = "\033[1m"
-COLOR_FAINT = "\033[2m"
-COLOR_ITALIC = "\033[3m"
-COLOR_UNDERLINE = "\033[4m"
-COLOR_BLINK = "\033[5m"
-COLOR_NEGATIVE = "\033[7m"
-COLOR_CROSSED = "\033[9m"
-
-# Reset to default colors
 COLOR_RESET = "\033[0m"
 
 # moves the cursor, to a location in the terminal
