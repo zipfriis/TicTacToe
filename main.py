@@ -1,4 +1,19 @@
-import os  # only get sued for:     os.get_terminal_size().columns     and     os.get_terminal_size().lines
+# To run this program, I recommend the following steps:
+# 
+# 1. Open a full-screen terminal or console window.
+#    - This is important because the program uses ASCII art that may not display correctly in smaller windows.
+# 
+# 2. Navigate to the folder where this script (main.py) is saved.
+#    - You can use the `cd` (change directory) command in the terminal to do this.
+#    - For example, if the file is in a folder called "my_project" on the desktop:
+#        cd Desktop/my_project
+#
+# 3. Run the program using one of the following commands:
+#    - On Windows, use: `python main.py`
+#    - On Linux/macOS, or if Python 3 is required: `python3 main.py`
+# This import is simple, and get used ones... it enables the program to know the size of the console screen..
+# the os module is part of python core lib, and nothing is needed to be installed. 
+import os  # only get used for:     os.get_terminal_size().columns     and     os.get_terminal_size().lines
 
 highlight_start = "\033[1;37;44m"  # Bright white text on blue background
 highlight_end = "\033[0m"  # Reset formatting
@@ -28,21 +43,10 @@ COLOR_NEGATIVE="\033[7m"
 COLOR_CROSSED="\033[9m"
 
 BG_COLOR_BLACK = "\033[40m"
-BG_COLOR_RED = "\033[41m"
-BG_COLOR_GREEN = "\033[42m"
-BG_COLOR_BROWN = "\033[43m"  
-BG_COLOR_BLUE = "\033[44m"
-BG_COLOR_PURPLE = "\033[45m"
-BG_COLOR_CYAN = "\033[46m"
 BG_COLOR_LIGHT_GRAY = "\033[47m"
 BG_COLOR_DARK_GRAY = "\033[100m"  # ANSI code for bright black (dark gray)
-BG_COLOR_LIGHT_RED = "\033[101m"
-BG_COLOR_LIGHT_GREEN = "\033[102m"
-BG_COLOR_YELLOW = "\033[103m"
-BG_COLOR_LIGHT_BLUE = "\033[104m"
-BG_COLOR_LIGHT_PURPLE = "\033[105m"
-BG_COLOR_LIGHT_CYAN = "\033[106m"
-BG_COLOR_LIGHT_WHITE = "\033[107m"
+
+
 
 # Text styles (already provided, just including for reference)
 COLOR_BOLD = "\033[1m"
@@ -520,52 +524,13 @@ def GameLoop():
     if GameMode == 1:
         GameMode1(Screen_width, Screen_Height)
     elif GameMode == 2:
-        PrintCenter(["Dont Have a bot programmed at this time"])
+        GameMode2()
     elif GameMode == 3:
         GameMode3(Screen_width, Screen_Height)
-        pass
     elif GameMode == 4: # this game mode is not done
-        BoardLocations: list[list[list[int]]] = RenderSuperBoard(Screen_width, Screen_Height)
+        GameMode4(Screen_width, Screen_Height)
 
-        Spaces: list[list[int]] = [[1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9],
-                                   [1,2,3,4,5,6,7,8,9]]
-
-        # super players board state, info https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe
-        # 3x3 for each 3x3 
-        Player1: list[bool] = [[False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False]]
-        Player2: list[bool] = [[False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False]]
-        while True:
-            for x in range(9):
-                SectionBoard = BoardLocations[x]
-                for idx, t in enumerate(SectionBoard):
-                    movecursor(t[0],t[1])
-                    print(idx + 1, end= "")
-                    Choise = AskForMove(Spaces[x], SectionBoard, int(Screen_width), Screen_Height)
-
-
+#  all the game modes a splitted up in functions. 
 def GameMode1(Screen_width, Screen_Height):
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
@@ -600,8 +565,44 @@ def GameMode1(Screen_width, Screen_Height):
             exit()
         Round = Round + 1
     EndMessage("Tie", Screen_width, Screen_Height)       
-    
-       
+
+
+def GameMode2(Screen_width, Screen_Height):
+    BoardLocation = RenderBoard(Screen_width, Screen_Height)
+
+    Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
+
+    # players board state
+    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Round: int = 0
+    for x in range(9):
+        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
+        Choise = int(Choise)
+        # assuming that the value excict other could not be chosen, in AskForMove
+        Spaces.remove(int(Choise))
+        Player: list[bool]
+        Icon: str = "O"
+        if Round % 2 == 0:
+            Icon = "x"
+            Player = Player1
+        else:
+            Icon = "O"
+            Player = Player2
+        Player[Choise-1] = True
+        RenderSelection(Choise, Icon, BoardLocation)
+        movecursor(Screen_Height-1, Screen_width)
+        win: bool = CheckWinner(Player)
+        if win:
+            if Icon == "x":
+                EndMessage("X Won", Screen_width, Screen_Height)
+            else:
+                EndMessage("O Won", Screen_width, Screen_Height)
+            exit()
+        Round = Round + 1
+    EndMessage("Tie", Screen_width, Screen_Height)       
+
+
 def GameMode3(Screen_width, Screen_Height):
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
@@ -680,6 +681,47 @@ def GameMode3(Screen_width, Screen_Height):
             exit()
         Round = Round + 1
 
+
+def GameMode4(Screen_width, Screen_Height):
+    BoardLocations: list[list[list[int]]] = RenderSuperBoard(Screen_width, Screen_Height)
+
+    Spaces: list[list[int]] = [[1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9],
+                               [1,2,3,4,5,6,7,8,9]]
+
+        # super players board state, info https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe
+        # 3x3 for each 3x3 
+    Player1: list[bool] = [[False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False]]
+    Player2: list[bool] = [[False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False],
+                            [False, False, False, False, False, False, False, False, False]]
+    while True:
+        for x in range(9):
+            SectionBoard = BoardLocations[x]
+            for idx, t in enumerate(SectionBoard):
+                movecursor(t[0],t[1])
+                print(idx + 1, end= "")
+                Choise = AskForMove(Spaces[x], SectionBoard, int(Screen_width), Screen_Height)
         
 
 if __name__=="__main__":
