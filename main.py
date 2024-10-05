@@ -97,9 +97,64 @@ def PrintCenter(StringList: list[str], Width, Height):
         movecursor((Height-len(StringList))/2 + idx, (Width-len(StringList[0]))/2)
         print(x, end="")
     movecursor(Height-1,Width)
-            
 
 
+def CheckWinner(Player: list[bool]) -> bool:
+    # rows
+    if Player[0] and Player[1] and Player[2]:
+        return True
+    elif Player[3] and Player[4] and Player[5]:
+        return True
+    elif Player[6] and Player[7] and Player[8]:
+        return True
+    elif Player[0] and Player[3] and Player[6]: # colums
+        return True
+    elif Player[1] and Player[4] and Player[7]:
+        return True
+    elif Player[2] and Player[5] and Player[8]:
+        return True
+    elif Player[0] and Player[4] and Player[8]:  # diangel
+        return True
+    elif Player[2] and Player[4] and Player[6]:
+        return True
+    else:
+        return False     
+
+
+def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
+    '''
+    returns: get the score of all spaces which can be pciked, and sums it. 
+    +1, -1, 0 = win, loss, tie. 
+    '''
+    # assuming its the Bot turn when this function is called.
+    Spaces: list[int] = []
+    for idx in range(9):
+        if BotSpaces[idx] == False and Player[idx] == False:
+            Spaces.append(idx)
+    # making a score for each space...
+    Scores: list[int] = []
+    for Space in Spaces:
+        # Copy bot space to temp one...
+        TempBotSpace: list[bool] =  BotSpaces.copy()
+        TempBotSpace[Space] = True      
+        # get score of the space
+        win = CheckWinner(TempBotSpace) # if the bot just won, score of one i given to that space. 
+        if win: 
+            Scores.append(1)
+        else:
+            if len(Spaces) == 1:
+                return 0
+
+        # if player did not win, are score needs to be determant by the function self.
+        SumScore = MiniMaxAlgo(Player, TempBotSpace)
+        # these score is with ther perspection from player.  Spaces Scores is based on the later scores of the remaning spaces.
+        Scores.append(-SumScore)
+    # Assuming all scores in now noted.
+    SumScore: int = 0
+    for Score in Scores:
+        SumScore = SumScore + Score
+    
+    return SumScore
 
 
 def OptionMenu(Width: int, Height: int) -> int:
@@ -196,27 +251,6 @@ def EndMessage(Message: str, Width: int, Height: int):
         pass
     elif Message == "Bot Won":
         pass
-
-def CheckWinner(Player: list[bool]) -> bool:
-    # rows
-    if Player[0] and Player[1] and Player[2]:
-        return True
-    elif Player[3] and Player[4] and Player[5]:
-        return True
-    elif Player[6] and Player[7] and Player[8]:
-        return True
-    elif Player[0] and Player[3] and Player[6]: # colums
-        return True
-    elif Player[1] and Player[4] and Player[7]:
-        return True
-    elif Player[2] and Player[5] and Player[8]:
-        return True
-    elif Player[0] and Player[4] and Player[8]:  # diangel
-        return True
-    elif Player[2] and Player[4] and Player[6]:
-        return True
-    else:
-        return False
 
 
 def render_icon(icon_type: str) -> list[str]:
@@ -494,7 +528,7 @@ def GameLoop():
     if GameMode == 1:
         GameMode1(Screen_width, Screen_Height)
     elif GameMode == 2:
-        GameMode2()
+        GameMode2(Screen_width, Screen_Height)
     elif GameMode == 3:
         GameMode3(Screen_width, Screen_Height)
     elif GameMode == 4: # this game mode is not done
@@ -545,10 +579,29 @@ def GameMode2(Screen_width, Screen_Height):
     # players board state
     Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
     Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+
     Round: int = 0
-    for x in range(9):
-        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
-        Choise = int(Choise)
+    for _ in range(9):
+        if Round % 2 == 0:
+            Choise = int(AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height))
+        else:
+            # move with a algo
+            Scores: list[int] = []
+            BestScore: int
+            BestSpace: int
+            for Space in Spaces:
+                # Copy bot space to temp one...
+                TempBotSpace: list[bool] = Player2.copy()
+                TempBotSpace[Space-1] = True
+                SumScore = MiniMaxAlgo(Player1, TempBotSpace)
+                Scores.append(-SumScore)
+            BestScore = Scores[0]
+            BestSpace = Spaces[0]
+            for idx, score in enumerate(Scores):
+                if score > BestScore:
+                    BestScore = score
+                    BestSpace = Spaces[idx]
+            Choise = BestSpace
         # assuming that the value excict other could not be chosen, in AskForMove
         Spaces.remove(int(Choise))
         Player: list[bool]
@@ -570,7 +623,7 @@ def GameMode2(Screen_width, Screen_Height):
                 EndMessage("O Won", Screen_width, Screen_Height)
             exit()
         Round = Round + 1
-    EndMessage("Tie", Screen_width, Screen_Height)       
+    EndMessage("Tie", Screen_width, Screen_Height)        
 
 
 def GameMode3(Screen_width, Screen_Height):
