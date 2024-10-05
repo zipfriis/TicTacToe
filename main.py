@@ -70,7 +70,7 @@ def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, 
     TeleportCursor(OutputLocation, 0)
     print(" "*Width, end="")
     TeleportCursor(Height-1, Width)
-    return Choise
+    return int(Choise)
 
 
 def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
@@ -226,6 +226,7 @@ def OptionMenu(Width: int, Height: int) -> int:
 
 def EndMessage(Message: str, Width: int, Height: int):
     if Message == "X Won":
+        # sub zero big font...
         MessageString = [
             " __  __        __     __     ______     __   __    ",
             '/\_\_\_\      /\ \  _ \ \   /\  __ \   /\ "-.\ \   ',
@@ -234,6 +235,7 @@ def EndMessage(Message: str, Width: int, Height: int):
             "  \/_/\/_/      \/_/   \/_/   \/_____/   \/_/ \/_/ "]
         PrintCenter(MessageString, Width, Height)
     elif Message == "O Won":
+        # sub zero big font...
         MessageString = [
             " ______        __     __     ______     __   __    ",
             '/\  __ \      /\ \  _ \ \   /\  __ \   /\ "-.\ \   ',
@@ -250,14 +252,37 @@ def EndMessage(Message: str, Width: int, Height: int):
             '   \ \_\  \ \_\  \ \_____\  \ \____- ',
             '    \/_/   \/_/   \/_____/   \/____/ ']
         PrintCenter(MessageString, Width, Height)
-        
-    
     elif Message == "You Won":
         pass
     elif Message == "Bot Won":
-        pass
+        # sub zero big font...
+        # https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=Bot%20Won
+        MessageString = ['                                                                             ',
+                         COLOR_RED,
+                         '          .                                                      .           ',
+                         '        .n                   .                 .                  n.         ',
+                         '  .   .dP                  dP                   9b                 9b.    .  ',
+                         ' 4    qXb         .       dX                     Xb       .        dXp     t ',
+                         'dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb',
+                         '9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP',
+                         ' 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP ',
+                         "  `9XXXXXXXXXXXXXXXXXXXXX'~   ~`OOO8b   d8OOO'~   ~`XXXXXXXXXXXXXXXXXXXXXP   ",
+                         "    `9XXXXXXXXXXXP' `9XX'   YOU    `98v8P'    LOST   `XXP' `9XXXXXXXXXXXP    ",
+                         '        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~        ',
+                         "                        )b.  .dbo.dP'`v'`9b.odb.  .dX(                       ",
+                         '                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.                      ',
+                         "                     dXXXXXXXXXXXP'   .   `9XXXXXXXXXXXb                     ",
+                         '                    dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb                    ',
+                         "                    9XXb'   `XXXXXb.dX|Xb.dXXXXX'   `dXXP                    ",
+                         "                     `'      9XXXXXX(   )XXXXXXP      `'                     ",
+                         "                              XXXX X.`v'.X XXXX                              ",
+                         "                              XP^X'`b   d'`X^XX                              ",
+                         "                              X. 9  `   '  P )X                              ",
+                         "                              `b  `       '  d                               ",
+                         "                               `             '                               "]
+        PrintCenter(MessageString, Width, Height)
 
-
+# https://patorjk.com/software/taag/#p=testall&f=Isometric2&t=O%20X
 def render_icon(icon_type: str) -> list[str]:
     """Returns the corresponding icon as a list of strings based on the icon type."""
     if icon_type == "x":
@@ -279,7 +304,7 @@ def render_icon(icon_type: str) -> list[str]:
             "              "
         ], COLOR_LIGHT_GREEN
 
-
+# uses https://patorjk.com/software/taag/#p=testall&f=Isometric2&t=O%20X 
 def render_number(num: int) -> list[str]:
     """Returns the corresponding number as a list of strings."""
     num_list = [
@@ -400,7 +425,7 @@ def RenderBoard(Width: int, Height: int) -> list[list[int]]:
     "│              │              │              │\n",
     "└──────────────┴──────────────┴──────────────┘\n"]
 
-    movecursor(7,0)
+    TeleportCursor(7,0)
     TopSpace = ((int(Height/2))-15)
     print((" " * Width ) * TopSpace, end="")
     
@@ -414,26 +439,28 @@ def RenderBoard(Width: int, Height: int) -> list[list[int]]:
         [TopSpace+7+1+14,LeftSpace+2],[TopSpace+7+1+14,LeftSpace+2+15],[TopSpace+7+1+14,LeftSpace+2+30]]
 
     for i, x in enumerate(SpaceLoactions):
-        movecursor(x[0], x[1])
+        TeleportCursor(x[0], x[1])
         for idx, s in enumerate(render_number(i+ 1)):
-            movecursor(x[0]+idx, x[1])
+            TeleportCursor(x[0]+idx, x[1])
             print(s,end="")
     # just setting the cursor in the corner, if it gets closed or cras, it will not nuke the text
-    movecursor(Height-1,Width)
+    TeleportCursor(Height-1,Width)
     return SpaceLoactions
 
 
 def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
-    # This is a String which will not overwrite the number written in the spaces...
-    # this become usefull if you like to change color of board but not the icons..
-    InnerBoard = [
-        "┌───┬───┬───┐",
-        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
-        "├───┼───┼───┤",
-        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
-        "├───┼───┼───┤",
-        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
-        "└───┴───┴───┘"]
+    GigO = ["     ____    ",
+            "    / __ \   ",
+            "   | |  | |  ",
+            "   | |  | |  ",
+            "   | |__| |  ",
+            "    \____/   "]
+    GigX = ["   __   __   ",
+            "   \ \ / /   ",
+            "    \ V /    ",
+            "     > <     ",
+            "    / . \    ",
+            "   /_/ \_\   "]
     BoardStringList = [
         "┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓",
         "┃ ┌───┬───┬───┐1┃ ┌───┬───┬───┐2┃ ┌───┬───┬───┐3┃",
@@ -601,7 +628,7 @@ def GameMode1(Screen_width, Screen_Height):
     EndMessage("Tie", Screen_width, Screen_Height)       
 
 
-def GameMode2(Screen_width, Screen_Height):
+def GameMode2(Screen_width: int, Screen_Height: int):
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
     Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
@@ -650,7 +677,7 @@ def GameMode2(Screen_width, Screen_Height):
             if Icon == "x":
                 EndMessage("X Won", Screen_width, Screen_Height)
             else:
-                EndMessage("O Won", Screen_width, Screen_Height)
+                EndMessage("Bot Won", Screen_width, Screen_Height)
             exit()
         Round = Round + 1
     EndMessage("Tie", Screen_width, Screen_Height)        
@@ -734,12 +761,70 @@ def GameMode3(Screen_width, Screen_Height):
             exit()
         Round = Round + 1
 
+def AskBoardToUse(Spaces: list[int], BoardLocations: list[list[list[int]]], Width: int, Height: int) -> int:
+    OutputLocation = (BoardLocations[0][0][0]-7)/2+7
+    TeleportCursor(OutputLocation, BoardLocations[0][0][0] - 2)
+    print("(q for quit) Please Pick a Board Number to Start ", end="")
+    for x in Spaces:
+        print(str(x) + ", ", end="")
+    while True:
+        Choise = input("\033[%d;%dH" % (OutputLocation, BoardLocations[0][0][0] - 2) +": " + (" " * int(Width - BoardLocations[0][0][0] - 2))+ "\033[%d;%dH" % (OutputLocation, BoardLocations[0][0][0] - 2))
+        StringSpaces = map(str, Spaces)
+        if Choise in StringSpaces:
+            break
+        if Choise == "q":
+            TeleportCursor(Height-1,Width)
+            exit(0)
+    # wipeping 
+    TeleportCursor(OutputLocation, 0)
+    print(" "*Width, end="")
+    TeleportCursor(Height-1, Width)
+    return int(Choise)
+
+
+def HighLightBoardSpace(BoardNumber: int, BoardLocations: list[list[list[int]]], Width: int, Height: int):
+    CornerLocationY, CornerLocationX = BoardLocations[BoardNumber-1][0]
+    # ofsets from frist space normal number location to the innner board location
+    CornerLocationY = CornerLocationY - 1
+    CornerLocationX = CornerLocationX - 2
+
+    # This is a String which will not overwrite the number written in the spaces...
+    # this become usefull if you like to change color of board but not the icons..
+    InnerBoard = [
+        "┌───┬───┬───┐",
+        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
+        "├───┼───┼───┤",
+        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
+        "├───┼───┼───┤",
+        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
+        "└───┴───┴───┘"]
+    for idx, string in enumerate(InnerBoard):
+        print(COLOR_YELLOW, end="")
+        TeleportCursor(CornerLocationY + idx, CornerLocationX)
+        print(string, end="")
+        print(COLOR_BLUE)
+
+    OtherBoards = [1,2,3,4,5,6,7,8,9]
+    OtherBoards.remove(BoardNumber)
+    
+    for otherboard in OtherBoards:
+        CLocationY, CLocationX = BoardLocations[otherboard-1][0]
+        # ofsets from frist space normal number location to the innner board location
+        CLocationY = CLocationY - 1
+        CLocationX = CLocationX - 2
+        for idx, string in enumerate(InnerBoard):
+            print(COLOR_BLUE, end="")
+            TeleportCursor(CLocationY + idx, CLocationX)
+            print(string, end="")
+    
+
 
 def GameMode4(Screen_width, Screen_Height):
     # Returns the terminal cursor locations, first list is alll board, then 9 spaces and a list with 2 times, x and y...
     BoardLocations: list[list[list[int]]] = RenderSuperBoard(Screen_width, Screen_Height)
 
-    Spaces: list[list[int]] = [[1,2,3,4,5,6,7,8,9],
+    Boards: list[int] = [1,2,3,4,5,6,7,8,9]
+    BoardSpaces: list[list[int]] = [[1,2,3,4,5,6,7,8,9],
                                [1,2,3,4,5,6,7,8,9],
                                [1,2,3,4,5,6,7,8,9],
                                [1,2,3,4,5,6,7,8,9],
@@ -771,14 +856,40 @@ def GameMode4(Screen_width, Screen_Height):
                             [False, False, False, False, False, False, False, False, False],
                             [False, False, False, False, False, False, False, False, False],
                             [False, False, False, False, False, False, False, False, False]]
+    CurrentSelectedBoard: int
+    HaveNoBoardSlected: bool = False
+    Round: int = 0
     while True: # Cant be sure how many rounds it will take, to finish a game...
-        for x in range(9):
-            SectionBoard = BoardLocations[x]
-            for idx, t in enumerate(SectionBoard):
-                TeleportCursor(t[0],t[1])
-                print(idx + 1, end= "")
-                Choise = AskForMove(Spaces[x], SectionBoard, int(Screen_width), Screen_Height)
-        
+        if HaveNoBoardSlected == False:
+            BoardChoise = AskBoardToUse(Boards, BoardLocations, Screen_width, Screen_Height)
+            CurrentSelectedBoard = BoardChoise
+        Spaces = BoardSpaces[CurrentSelectedBoard-1]
+        SubBoardLocations = BoardLocations[CurrentSelectedBoard-1]
+        HighLightBoardSpace(CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
+        Choise = AskForMove(Spaces, SubBoardLocations, Screen_width, Screen_Height)
+        Player: list[bool]
+        Icon = ""
+        if Round % 2 == 0:
+            Player = Player1[CurrentSelectedBoard-1]
+            Icon = "X"
+        else:
+            Player = Player2[CurrentSelectedBoard-1]
+            Icon = "O"
+        Player[Choise-1] = True
+        LocationY = SubBoardLocations[Choise-1][0]
+        LocationX = SubBoardLocations[Choise-1][1]
+        TeleportCursor(LocationY, LocationX)
+        if Icon == "X": 
+            print(COLOR_RED + Icon, end="")
+        else:
+            print(COLOR_GREEN + Icon, end="")
+        # gives palyer new board
+        CurrentSelectedBoard = Choise
+        HaveNoBoardSlected = True
+        # incriment round
+        Round = Round + 1
+
+
 
 if __name__=="__main__":
     TicTacToe()
