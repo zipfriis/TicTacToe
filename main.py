@@ -27,12 +27,27 @@ COLOR_LIGHT_PURPLE="\033[1;35m"
 COLOR_BOLD = "\033[1m"
 COLOR_RESET = "\033[0m"
 
-# moves the cursor, to a location in the terminal
-def TeleportCursor(y, x):
+def TeleportCursor(y: int , x: int):
+    """
+    This fucntion allows the program to move the cursor. 
+    Meaning the the starting point of where print funtion will place charactors.
+
+    Teleport do not interact with nothing else then cursor... No return value
+    """
+    if not isinstance(y, int) or not isinstance(x, int):
+        raise TypeError(f"Expected integers for y and x, but got {type(y)} and {type(x)}")
     print("\033[%d;%dH" % (y, x), end="")
 
 
 def MoveCursor(x, y) -> str:
+    """
+    This function make a way to move cursor, without placing any chars.
+
+    Move return a value based of the movement, this is done becaurse move negative is a defrind char.
+    The trick here is it works as a char you can use multiple times, and the action does not need multiple calls to do the same action.
+    """
+    if not isinstance(y, int) or not isinstance(x, int):
+        raise TypeError(f"Expected integers for y and x, but got {type(y)} and {type(x)}")
     movement = ""
     # Move down or up based on the y value
     if y > 0: movement += f"\033[{y}B"  # Move down
@@ -47,13 +62,24 @@ def MoveCursor(x, y) -> str:
 
 # basicly set cursor to wipe from and print space to fill screen
 def WipeScreen(LineStart: int):
+    """
+    WipeScreen basicly prints space chars to fill out the screen.
+    if the program want to wipe from a given point, it can use LineStart. which will be used by cursor before wipe.
+    
+    Importantly this function uses os core lib, to know how big the screen is.
+    This is done, if in future cases of resizesing support, where the point of wipe is to re-render the whole game.
+    """
+    if not isinstance(LineStart, int) :
+        raise TypeError(f"Expected integers for LineStart, but got {type(LineStart)} ")
+    Width = os.get_terminal_size().columns
+    Height = os.get_terminal_size().lines
     TeleportCursor(LineStart,0)
-    print(" " * os.get_terminal_size().columns * (os.get_terminal_size().lines - 7), end="")
+    print(" " * Width * (Height- 7), end="")
     TeleportCursor(LineStart,0)
 
 
 def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
-    OutputLocation = (BoardLoacations[0][0]-7)/2+7
+    OutputLocation = int((BoardLoacations[0][0]-7)/2+7)
     TeleportCursor(OutputLocation, BoardLoacations[0][1])
     print("(q for quit) Please Pick a Space... ", end="")
     for x in Spaces:
@@ -105,7 +131,7 @@ def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[li
 def PrintCenter(StringList: list[str], Width, Height):
     WipeScreen(7)
     for idx, x in enumerate(StringList):
-        TeleportCursor((Height-len(StringList))/2 + idx, (Width-len(StringList[0]))/2)
+        TeleportCursor(int((Height-len(StringList))/2) + idx, int((Width-len(StringList[0]))/2))
         print(x, end="")
     TeleportCursor(Height-1,Width)
 
@@ -167,8 +193,26 @@ def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
     
     return SumScore
 
-def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLocation: int, Height, Widht):
-    if HeightLimit > 10:
+
+def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLocation: int, Height, Width:int):
+    if HeightLimit > 16:
+        StringList: list[str] = ["                                                 *******                 ",
+                                  "                                 ~             *---*******              ",
+                                  "                                ~             *-----*******             ",
+                                  "                         ~                   *-------*******            ", 
+                                  "                        __      _   _!__     *-------*******            ",
+                                  "                   _   /  \_  _/ \  |::| ___ **-----********   ~        ",
+                                  "                 _/ \_/^    \/   ^\/|::|\|:|  **---*****/^\_            ",
+                                  "              /\/  ^ /  ^    / ^ ___|::|_|:|_/\_******/  ^  \           ",
+                                  "             /  \  _/ ^ ^   /    |::|--|:|---|  \__/  ^     ^\___       ",
+                                  "           _/_^  \/  ^    _/ ^   |::|::|:|-::| ^ /_  ^    ^  ^   \_     ",
+                                  "          /   \^ /    /\ /       |::|--|:|:--|  /  \        ^      \    ",
+                                  "         /     \/    /  /        |::|::|:|:-:| / ^  \  ^      ^     \   ",
+                                  "   _Q   / _Q  _Q_Q  / _Q    _Q   |::|::|:|:::|/    ^ \   _Q      ^      ",
+                                  "  /_\)   /_\)/_/\\)  /_\)  /_\)  |::|::|:|:::|          /_\)            ",
+                                  '_O|/O___O|/O_OO|/O__O|/O__O|/O__________________________O|/O_"_________ ',
+                                  "//////////////////////////////////////////////////////////////////////  "]
+    elif HeightLimit > 10:
         StringList: list[str] = ["  ◌                             ◌                                       ◌              ",
                                  "                                             ‧₊ *:･ﾟ彡       ◌                 ☽︎       ◌",
                                  "               ◌                                 ✩彡 ･ﾟ *:                              ",
@@ -179,11 +223,11 @@ def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLo
                                  "                                            (    )  (    )                              ",
                                  "                                           ૮/ʚɞ  |ა ૮|  ʚɞ\ა                            ",
             "                                           ( ◌   |   |   ◌ )                            "]
-        StringHeight = len(StringList)
-        print(COLOR_YELLOW)
-        for idx, x in enumerate(StringList):
-            TeleportCursor(Height - StringHeight + idx, XLocation)
-            print(x, end="")
+    StringHeight = len(StringList)
+    print(COLOR_YELLOW)
+    for idx, x in enumerate(StringList):
+        TeleportCursor(Height - StringHeight + idx, int((Width-len(StringList[0]))/2))
+        print(x, end="")
 
 
 
@@ -206,9 +250,9 @@ def OptionMenu(Width: int, Height: int) -> int:
 
         # This len is done to the index of the longest string
         Longest = len(QuestionList[0]) + 2
-        LongestFirstLocationX = (Width - Longest)/2
+        LongestFirstLocationX = int((Width - Longest)/2)
 
-        TeleportCursor(9,(Width-5)/2)
+        TeleportCursor(9,int((Width-5)/2))
         print(COLOR_BOLD + "Game Modes", end=COLOR_RESET+COLOR_BLUE)       
         for idx, Question in enumerate(QuestionList):
             TeleportCursor(idx + 10, LongestFirstLocationX)
@@ -222,9 +266,9 @@ def OptionMenu(Width: int, Height: int) -> int:
         RenderRandomBottomArt(SpaceForArt, Width - 10, idx + 15, 5, Height, Width)
        
         print(COLOR_LIGHT_RED, end="")
-        TeleportCursor(idx+ 14, (Width-10)/2)
+        TeleportCursor(idx+ 14, int((Width-10)/2))
         print("‾‾‾‾‾‾‾‾‾‾‾‾", end="")
-        TeleportCursor(idx+ 13, (Width-10)/2)
+        TeleportCursor(idx+ 13, int((Width-10)/2))
         
 
         # the program will stall here until the user have made some kind of input...
@@ -444,14 +488,48 @@ def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation
         print(COLOR_LIGHT_BLUE, end="")
     
 
+def RenderMiniBoard(Screen_Width: int, Screen_Height: int):
+    MiniBaoard = [
+        "┌───┬───┬───┐",
+        "│ \ │ | │   │",
+        "├───┼───┼───┤",
+        "│   │ \ │   │",
+        "├───┼───┼───┤",
+        "│   │ | │ \ │",
+        "└───┴───┴───┘"
+    ]
+    pass
+
+
 def RenderBoard(Width: int, Height: int) -> list[list[int]]:
-    BoardStringList = []
-    BoardStringList.append("┌"+("─"*14+"┬")*2+"─"*14+"┐")
-    for _ in range(2):
-        BoardStringList.extend(["│"+(" "*14+"│")*2+" "*14+"│"]*6)
-        BoardStringList.append("├"+("─"*14+"┼")*2+"─"*14+"┤")
-    BoardStringList.extend(["│"+(" "*14+"│")*2+" "*14+"│"]*6)
-    BoardStringList.append( "└"+("─"*14+"┴")*2+"─"*14+"┘")
+    # Type checking at the beginning
+    if not isinstance(Width, int) or not isinstance(Height, int):
+        raise TypeError(f"Expected integers for Width and Height, but got {type(Width)} and {type(Height)}")
+
+
+    BoardStringList = [
+        "┌──────────────┬──────────────┬──────────────┐",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "├──────────────┼──────────────┼──────────────┤",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "├──────────────┼──────────────┼──────────────┤",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "│              │              │              │",
+        "└──────────────┴──────────────┴──────────────┘"]
 
     WipeScreen(7)
     TopSpace = int(((Height-7)-len(BoardStringList))/2) + 7 + 1 # + 1 is for inner location
@@ -572,8 +650,8 @@ def PrintStartScreen(Width: int):
 
 
 def TicTacToe():
-    Screen_width = os.get_terminal_size().columns
-    Screen_Height = os.get_terminal_size().lines
+    Screen_width: int = os.get_terminal_size().columns
+    Screen_Height: int = os.get_terminal_size().lines
 
     if Screen_width < 95 or Screen_Height < 42:
         WipeScreen(0)
