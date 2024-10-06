@@ -167,6 +167,25 @@ def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
     
     return SumScore
 
+def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLocation: int, Height, Widht):
+    if HeightLimit > 10:
+        StringList: list[str] = ["  ◌                             ◌                                       ◌              ",
+                                 "                                             ‧₊ *:･ﾟ彡       ◌                 ☽︎       ◌",
+                                 "               ◌                                 ✩彡 ･ﾟ *:                              ",
+                                 "                              ◌                                        ◌                ",
+                                 "◌                                                                                       ",
+                                 "                                                  ♡                                     ",
+                                 "                                            (\_(\    /)_/)                              ",
+                                 "                                            (    )  (    )                              ",
+                                 "                                           ૮/ʚɞ  |ა ૮|  ʚɞ\ა                            ",
+            "                                           ( ◌   |   |   ◌ )                            "]
+        StringHeight = len(StringList)
+        print(COLOR_YELLOW)
+        for idx, x in enumerate(StringList):
+            TeleportCursor(Height - StringHeight + idx, XLocation)
+            print(x, end="")
+
+
 
 def OptionMenu(Width: int, Height: int) -> int:
     # This loops until player deside to player ither by another person or internal bot
@@ -176,8 +195,8 @@ def OptionMenu(Width: int, Height: int) -> int:
         QuestionList = [
         "Play with another human, assuming you actually have friends, lol. ",
         "Challenge a bot, because... friends? Not really your thing? ",
-        "Move pieces, strategic mode... You sure you're up for this? ",
-        "Super Tic-Tac-Toe, so you think you're a genius now? ",
+        'Three pieces, you´ll need to exchange pieces to secure your victory.',
+        "Super Tic-Tac-Toe, so you think you're a genius now? (not done)",
         "Looking for an escape route already? "]
         QuestionListMaker = [COLOR_BLUE +"[" + COLOR_LIGHT_RED + "1" + COLOR_BLUE + "]", 
                              COLOR_BLUE +"[" + COLOR_LIGHT_RED + "2" + COLOR_BLUE + "]",
@@ -197,11 +216,18 @@ def OptionMenu(Width: int, Height: int) -> int:
         for idx, Maker in enumerate(QuestionListMaker):
             TeleportCursor(idx + 10, LongestFirstLocationX + Longest)
             print(Maker, end="")
+
+        # calculating what Space is left under the query... drawing ascii art.   
+        SpaceForArt = Height - idx+ 15
+        RenderRandomBottomArt(SpaceForArt, Width - 10, idx + 15, 5, Height, Width)
        
         print(COLOR_LIGHT_RED, end="")
         TeleportCursor(idx+ 14, (Width-10)/2)
         print("‾‾‾‾‾‾‾‾‾‾‾‾", end="")
         TeleportCursor(idx+ 13, (Width-10)/2)
+        
+
+        # the program will stall here until the user have made some kind of input...
         Answer = input("Pick one: ")
         print(COLOR_BLUE, end="")
         
@@ -214,14 +240,15 @@ def OptionMenu(Width: int, Height: int) -> int:
             print( COLOR_LIGHT_PURPLE +"Machine Mode" + COLOR_BLUE, end="")
             return 2
         elif Answer == "3":
-            print(COLOR_LIGHT_PURPLE + "Swap Mode" + COLOR_BLUE, end="")
+            print(COLOR_LIGHT_PURPLE + "Three Piece Swap " + COLOR_BLUE, end="")
             return 3
         elif Answer == "4":
-            print(COLOR_LIGHT_PURPLE + "Super Mode, Bot" + COLOR_BLUE, end="")
+            print(COLOR_LIGHT_PURPLE + "Super Mode, Bot (not done)" + COLOR_BLUE, end="")
             return 4
         elif Answer == "q":
             print("noob")
             exit(0)
+        # if the answer not valid, it will re-render the option menu
 
 
 def EndMessage(Message: str, Width: int, Height: int):
@@ -253,10 +280,27 @@ def EndMessage(Message: str, Width: int, Height: int):
             '    \/_/   \/_/   \/_____/   \/____/ ']
         PrintCenter(MessageString, Width, Height)
     elif Message == "You Won":
-        pass
+        #https://ascii.co.uk/art/medal
+        MessageString = ['                                                                             ',
+                         COLOR_RED,
+                              " _______________ ",
+                              "|@@@@|     |####|",
+                              "|@@@@|     |####|",
+                              "|@@@@|     |####|",
+                              "\@@@@|     |####/"
+                              " \@@@|     |###/ ",
+                              "  `@@|_____|##'  ",
+                              "       (O)       ",
+                              "    .-'''''-.    ",
+                              "  .'  * * *  `.  ",
+                              " :  *       *  : ",
+                              ": ~    YOU    ~ :",
+                              ": ~    WON    ~ :",
+                              " :  *       *  : ",
+                              "  `.  * * *  .'  ",
+                              "    `-.....-'    "]
     elif Message == "Bot Won":
-        # sub zero big font...
-        # https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=Bot%20Won
+        # https://ascii.co.uk/art/skull
         MessageString = ['                                                                             ',
                          COLOR_RED,
                          '          .                                                      .           ',
@@ -401,42 +445,26 @@ def RenderSwapSelection(ChoiseFrom: int, ChoiseTo: int, Icon: str, BoardLocation
     
 
 def RenderBoard(Width: int, Height: int) -> list[list[int]]:
-    BoardStringList = [
-    "┌──────────────┬──────────────┬──────────────┐\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "├──────────────┼──────────────┼──────────────┤\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "├──────────────┼──────────────┼──────────────┤\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "│              │              │              │\n",
-    "└──────────────┴──────────────┴──────────────┘\n"]
+    BoardStringList = []
+    BoardStringList.append("┌"+("─"*14+"┬")*2+"─"*14+"┐")
+    for _ in range(2):
+        BoardStringList.extend(["│"+(" "*14+"│")*2+" "*14+"│"]*6)
+        BoardStringList.append("├"+("─"*14+"┼")*2+"─"*14+"┤")
+    BoardStringList.extend(["│"+(" "*14+"│")*2+" "*14+"│"]*6)
+    BoardStringList.append( "└"+("─"*14+"┴")*2+"─"*14+"┘")
 
-    TeleportCursor(7,0)
-    TopSpace = ((int(Height/2))-15)
-    print((" " * Width ) * TopSpace, end="")
-    
-    LeftSpace = int((Width - 46) / 2)
-    for x in BoardStringList:
-        print(" " * LeftSpace + x, end="")
+    WipeScreen(7)
+    TopSpace = int(((Height-7)-len(BoardStringList))/2) + 7 + 1 # + 1 is for inner location
+    LeftSpace = int((Width-len(BoardStringList[0]))/2) + 1 # + 1 is for inner location
+    for idx, string in enumerate(BoardStringList):
+        TeleportCursor(TopSpace + idx - 1, LeftSpace - 1) # -1 to make the cursor of the outer location
+        print(string, end="")
+
 
     SpaceLoactions: list[list[int]] = [
-        [TopSpace+7+1,LeftSpace+2],[TopSpace+7+1,LeftSpace+2+15],[TopSpace+7+1,LeftSpace+2+30],
-        [TopSpace+7+1+7,LeftSpace+2],[TopSpace+7+1+7,LeftSpace+2+15],[TopSpace+7+1+7,LeftSpace+2+30],
-        [TopSpace+7+1+14,LeftSpace+2],[TopSpace+7+1+14,LeftSpace+2+15],[TopSpace+7+1+14,LeftSpace+2+30]]
+        [TopSpace,LeftSpace],[TopSpace,LeftSpace+15],[TopSpace,LeftSpace+30],
+        [TopSpace+7,LeftSpace],[TopSpace+7,LeftSpace+15],[TopSpace+7,LeftSpace+30],
+        [TopSpace+14,LeftSpace],[TopSpace+14,LeftSpace+15],[TopSpace+14,LeftSpace+30]]
 
     for i, x in enumerate(SpaceLoactions):
         TeleportCursor(x[0], x[1])
@@ -464,27 +492,27 @@ def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
     BoardStringList = [
         "┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓",
         "┃ ┌───┬───┬───┐1┃ ┌───┬───┬───┐2┃ ┌───┬───┬───┐3┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 1 │ 2 │ 3 │ ┃ │ 1 │ 2 │ 3 │ ┃ │ 1 │ 2 │ 3 │ ┃",
         "┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 4 │ 5 │ 6 │ ┃ │ 4 │ 5 │ 6 │ ┃ │ 4 │ 5 │ 6 │ ┃",
         "┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 7 │ 8 │ 9 │ ┃ │ 7 │ 8 │ 9 │ ┃ │ 7 │ 8 │ 9 │ ┃",
         "┃ └───┴───┴───┘ ┃ └───┴───┴───┘ ┃ └───┴───┴───┘ ┃",
         "┣━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━┫",
         "┃ ┌───┬───┬───┐4┃ ┌───┬───┬───┐5┃ ┌───┬───┬───┐6┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 1 │ 2 │ 3 │ ┃ │ 1 │ 2 │ 3 │ ┃ │ 1 │ 2 │ 3 │ ┃",
         "┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 4 │ 5 │ 6 │ ┃ │ 4 │ 5 │ 6 │ ┃ │ 4 │ 5 │ 6 │ ┃",
         "┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 7 │ 8 │ 9 │ ┃ │ 7 │ 8 │ 9 │ ┃ │ 7 │ 8 │ 9 │ ┃",
         "┃ └───┴───┴───┘ ┃ └───┴───┴───┘ ┃ └───┴───┴───┘ ┃",
         "┣━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━┫",
         "┃ ┌───┬───┬───┐7┃ ┌───┬───┬───┐8┃ ┌───┬───┬───┐9┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 1 │ 2 │ 3 │ ┃ │ 1 │ 2 │ 3 │ ┃ │ 1 │ 2 │ 3 │ ┃",
         "┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 4 │ 5 │ 6 │ ┃ │ 4 │ 5 │ 6 │ ┃ │ 4 │ 5 │ 6 │ ┃",
         "┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃ ├───┼───┼───┤ ┃",
-        "┃ │   │   │   │ ┃ │   │   │   │ ┃ │   │   │   │ ┃",
+        "┃ │ 7 │ 8 │ 9 │ ┃ │ 7 │ 8 │ 9 │ ┃ │ 7 │ 8 │ 9 │ ┃",
         "┃ └───┴───┴───┘ ┃ └───┴───┴───┘ ┃ └───┴───┴───┘ ┃",
         "┗━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┛"]
     BoardHeight = len(BoardStringList)
@@ -675,7 +703,7 @@ def GameMode2(Screen_width: int, Screen_Height: int):
         win: bool = CheckWinner(Player)
         if win:
             if Icon == "x":
-                EndMessage("X Won", Screen_width, Screen_Height)
+                EndMessage("You Won", Screen_width, Screen_Height)
             else:
                 EndMessage("Bot Won", Screen_width, Screen_Height)
             exit()
@@ -690,13 +718,31 @@ def GameMode3(Screen_width, Screen_Height):
 
     # players board state
     Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
-    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Bot: list[bool] = [False, False, False, False, False, False, False, False, False]
     Round: int = 0
     
-    # limits the game mode 1 logic to 6 rounds... 
+    # limits the game mode 2 logic to 6 rounds... 
     for x in range(6):
-        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
-        Choise = int(Choise)
+        if Round % 2 == 0:
+            Choise = int(AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height))
+        else:
+            # move with a algo
+            Scores: list[int] = []
+            BestScore: int
+            BestSpace: int
+            for Space in Spaces:
+                # Copy bot space to temp one...
+                TempBotSpace: list[bool] = Bot.copy()
+                TempBotSpace[Space-1] = True
+                SumScore = MiniMaxAlgo(Player1, TempBotSpace)
+                Scores.append(-SumScore)
+            BestScore = Scores[0]
+            BestSpace = Spaces[0]
+            for idx, score in enumerate(Scores):
+                if score > BestScore:
+                    BestScore = score
+                    BestSpace = Spaces[idx]
+            Choise = BestSpace
         # assuming that the value excict other could not be chosen, in AskForMove
         Spaces.remove(int(Choise))
         Player: list[bool]
@@ -706,16 +752,16 @@ def GameMode3(Screen_width, Screen_Height):
             Player = Player1
         else:
             Icon = "O"
-            Player = Player2
+            Player = Bot
         Player[Choise-1] = True
         RenderSelection(Choise, Icon, BoardLocation)
         TeleportCursor(Screen_Height-1, Screen_width)
         win: bool = CheckWinner(Player)
         if win:
             if Icon == "x":
-                EndMessage("X Won", Screen_width, Screen_Height)
+                EndMessage("You Won", Screen_width, Screen_Height)
             else:
-                EndMessage("O Won", Screen_width, Screen_Height)
+                EndMessage("Bot Won", Screen_width, Screen_Height)
             exit()
         Round = Round + 1
     
@@ -729,7 +775,7 @@ def GameMode3(Screen_width, Screen_Height):
             Player = Player1
         else:
             Icon = "O"
-            Player = Player2
+            Player = Bot
         
         # finding what number a given player owns and therfore can mode from.
         # using the bool value list, which is normally used for checking the win condition.
@@ -742,11 +788,20 @@ def GameMode3(Screen_width, Screen_Height):
         # finding spaces which is not used.
         BoardLocationsTo: list[int] = []
         for x in range(9): # there are 9 spaces, and i need both players value, so using index, for the player to check
-            if Player1[x] == False and Player2[x] == False:
+            if Player1[x] == False and Bot[x] == False:
                 BoardLocationsTo.append(x + 1) # convert from index to real(index start from 0, not 1)
 
-
-        FromLocation, ToLocation = AskSwap(BoardLocationsFrom, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
+        if Round % 2 == 0:
+            FromLocation, ToLocation = AskSwap(BoardLocationsFrom, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
+        else:
+            ## need some random var to decide, where to move from and to...
+            time = int(os.times().elapsed*100)
+            ToLocation = Spaces[time % len(Spaces)]
+            BotSpaces: list[int] = []
+            for idx, space in enumerate(Player):
+                if space == True:
+                    BotSpaces.append(idx)
+            FromLocation = BotSpaces[time**2 % len(Spaces)]
         Player[FromLocation-1] = False
         Player[ToLocation-1] = True
 
@@ -755,11 +810,12 @@ def GameMode3(Screen_width, Screen_Height):
         win: bool = CheckWinner(Player)
         if win:
             if Icon == "x":
-                EndMessage("X Won", Screen_width, Screen_Height)
+                EndMessage("You Won", Screen_width, Screen_Height)
             else:
-                EndMessage("O Won", Screen_width, Screen_Height)
+                EndMessage("Bot Won", Screen_width, Screen_Height)
             exit()
         Round = Round + 1
+
 
 def AskBoardToUse(Spaces: list[int], BoardLocations: list[list[list[int]]], Width: int, Height: int) -> int:
     OutputLocation = (BoardLocations[0][0][0]-7)/2+7
