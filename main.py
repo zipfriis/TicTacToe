@@ -70,7 +70,8 @@ def WipeScreen(LineStart: int):
     This is done, if in future cases of resizesing support, where the point of wipe is to re-render the whole game.
     """
     if not isinstance(LineStart, int) :
-        raise TypeError(f"Expected integers for LineStart, but got {type(LineStart)} ")
+        raise TypeError(f"Expected integers for LineStart, but got {type(LineStart)}")
+    # Get screen size.
     Width = os.get_terminal_size().columns
     Height = os.get_terminal_size().lines
     TeleportCursor(LineStart,0)
@@ -78,7 +79,31 @@ def WipeScreen(LineStart: int):
     TeleportCursor(LineStart,0)
 
 
+def PrintCenter(StringList: list[str], Width, Height):
+    """
+    Takes a given list of strings, and makes sure it gets printed i the middle of the screen.
+    This wipes the screen, so get mostly used in the end of the game to represent a win or loss.
+    """
+    WipeScreen(7)
+    for idx, x in enumerate(StringList):
+        TeleportCursor(int((Height-len(StringList))/2) + idx, int((Width-len(StringList[0]))/2))
+        print(x, end="")
+    TeleportCursor(Height-1,Width)
+
+
+def PromptUser(Options: list[int], Location, Query: str):
+    """
+    Genaric way to ask for move, fro diffrent modes. Its going to be a gloified while
+    This could replace 3 function
+    """
+    pass
+
+
 def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
+    """
+    This prompts the users for what place a piece should be placed on.
+    the locatin of the prompt is bassed on the first board space location 
+    """
     OutputLocation = int((BoardLoacations[0][0]-7)/2+7)
     TeleportCursor(OutputLocation, BoardLoacations[0][1])
     print("(q for quit) Please Pick a Space... ", end="")
@@ -126,14 +151,6 @@ def AskSwap(SpacesFrom: list[int], SpacesTo: list[int], BoardLoacations: list[li
     print(" "*Width, end="")
     TeleportCursor(Height-1, Width)
     return int(ChoiseFrom), int(ChoiseTo)
-    
-
-def PrintCenter(StringList: list[str], Width, Height):
-    WipeScreen(7)
-    for idx, x in enumerate(StringList):
-        TeleportCursor(int((Height-len(StringList))/2) + idx, int((Width-len(StringList[0]))/2))
-        print(x, end="")
-    TeleportCursor(Height-1,Width)
 
 
 def CheckWinner(Player: list[bool]) -> bool:
@@ -161,9 +178,11 @@ def CheckWinner(Player: list[bool]) -> bool:
 def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
     '''
     returns: get the score of all spaces which can be pciked, and sums it. 
-    +1, -1, 0 = win, loss, tie. 
+    win     =  +1
+    loss    =  -1
+    tie     =   0  
     '''
-    # assuming its the Bot turn when this function is called.
+    # First realizing what paces that avilable for use.
     Spaces: list[int] = []
     for idx in range(9):
         if BotSpaces[idx] == False and Player[idx] == False:
@@ -174,7 +193,7 @@ def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
         # Copy bot space to temp one...
         TempBotSpace: list[bool] =  BotSpaces.copy()
         TempBotSpace[Space] = True      
-        # get score of the space
+        # get score of the space, sum of the trigle down space scores
         win = CheckWinner(TempBotSpace) # if the bot just won, score of one i given to that space. 
         if win: 
             Scores.append(1)
@@ -195,24 +214,41 @@ def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
 
 
 def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLocation: int, Height, Width:int):
+    ArtList = []
+    if HeightLimit > 14:
+        StringList: list[str] = ["            .'              ",
+                                 "           .-~<             ",
+                                 "        __/    > -'         ",
+                                 "      -~ ___--/             ",
+                                 "     /_//     \__           ",
+                                 "    '            \          ",
+                                 "    |          __/          ",
+                                 "   |O        |    .__,--_   ",
+                                 "    )        / d  . _>   /. ",
+                                 "   \       /.._  .)    <    ",
+                                 "    `     |<   \  `-.__/    ",
+                                 "    |    /  \__//.--...<|   ",
+                                 "    '-.__\\  - ' '--~|      "]
+        ArtList.append(StringList)
     if HeightLimit > 16:
-        StringList: list[str] = ["                                                 *******                 ",
-                                  "                                 ~             *---*******              ",
-                                  "                                ~             *-----*******             ",
-                                  "                         ~                   *-------*******            ", 
-                                  "                        __      _   _!__     *-------*******            ",
-                                  "                   _   /  \_  _/ \  |::| ___ **-----********   ~        ",
-                                  "                 _/ \_/^    \/   ^\/|::|\|:|  **---*****/^\_            ",
-                                  "              /\/  ^ /  ^    / ^ ___|::|_|:|_/\_******/  ^  \           ",
-                                  "             /  \  _/ ^ ^   /    |::|--|:|---|  \__/  ^     ^\___       ",
-                                  "           _/_^  \/  ^    _/ ^   |::|::|:|-::| ^ /_  ^    ^  ^   \_     ",
-                                  "          /   \^ /    /\ /       |::|--|:|:--|  /  \        ^      \    ",
-                                  "         /     \/    /  /        |::|::|:|:-:| / ^  \  ^      ^     \   ",
-                                  "   _Q   / _Q  _Q_Q  / _Q    _Q   |::|::|:|:::|/    ^ \   _Q      ^      ",
-                                  "  /_\)   /_\)/_/\\)  /_\)  /_\)  |::|::|:|:::|          /_\)            ",
-                                  '_O|/O___O|/O_OO|/O__O|/O__O|/O__________________________O|/O_"_________ ',
-                                  "//////////////////////////////////////////////////////////////////////  "]
-    elif HeightLimit > 10:
+        StringList: list[str] = ["                                                 *******                ",
+                                 "                                 ~             *---*******              ",
+                                 "                                ~             *-----*******             ",
+                                 "                         ~                   *-------*******            ",
+                                 "                        __      _   _!__     *-------*******            ",
+                                 "                   _   /  \_  _/ \  |::| ___ **-----********   ~        ",
+                                 "                 _/ \_/^    \/   ^\/|::|\|:|  **---*****/^\_            ",
+                                 "              /\/  ^ /  ^    / ^ ___|::|_|:|_/\_******/  ^  \           ",
+                                 "             /  \  _/ ^ ^   /    |::|--|:|---|  \__/  ^     ^\___       ",
+                                 "           _/_^  \/  ^    _/ ^   |::|::|:|-::| ^ /_  ^    ^  ^   \_     ",
+                                 "          /   \^ /    /\ /       |::|--|:|:--|  /  \        ^      \    ",
+                                 "         /     \/    /  /        |::|::|:|:-:| / ^  \  ^      ^     \   ",
+                                 "   _Q   / _Q  _Q_Q  / _Q    _Q   |::|::|:|:::|/    ^ \   _Q      ^      ",
+                                 '  /_\)   /_\)/_/\\)  /_\)  /_\)  |::|::|:|:::|          /_\)            ',
+                                 '_O|/O___O|/O_OO|/O__O|/O__O|/O__________________________O|/O_"_________ ',
+                                 "//////////////////////////////////////////////////////////////////////  "]
+        ArtList.append(StringList)
+    if HeightLimit > 10:
         StringList: list[str] = ["  ◌                             ◌                                       ◌              ",
                                  "                                             ‧₊ *:･ﾟ彡       ◌                 ☽︎       ◌",
                                  "               ◌                                 ✩彡 ･ﾟ *:                              ",
@@ -222,11 +258,15 @@ def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLo
                                  "                                            (\_(\    /)_/)                              ",
                                  "                                            (    )  (    )                              ",
                                  "                                           ૮/ʚɞ  |ა ૮|  ʚɞ\ა                            ",
-            "                                           ( ◌   |   |   ◌ )                            "]
+                                 "                                           ( ◌   |   |   ◌ )                            "]
+        ArtList.append(StringList)
     StringHeight = len(StringList)
     print(COLOR_YELLOW)
-    for idx, x in enumerate(StringList):
-        TeleportCursor(Height - StringHeight + idx, int((Width-len(StringList[0]))/2))
+    time = int(os.times().elapsed*100)
+    HeightLocation = Height - StringHeight 
+    WidthLocation = int((Width-len(StringList[0]))/2)
+    for idx, x in enumerate(ArtList[time % len(ArtList)]):
+        TeleportCursor(HeightLocation + idx, WidthLocation)
         print(x, end="")
 
 
@@ -555,18 +595,7 @@ def RenderBoard(Width: int, Height: int) -> list[list[int]]:
 
 
 def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
-    GigO = ["     ____    ",
-            "    / __ \   ",
-            "   | |  | |  ",
-            "   | |  | |  ",
-            "   | |__| |  ",
-            "    \____/   "]
-    GigX = ["   __   __   ",
-            "   \ \ / /   ",
-            "    \ V /    ",
-            "     > <     ",
-            "    / . \    ",
-            "   /_/ \_\   "]
+
     BoardStringList = [
         "┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓",
         "┃ ┌───┬───┬───┐1┃ ┌───┬───┬───┐2┃ ┌───┬───┬───┐3┃",
@@ -595,10 +624,11 @@ def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
         "┗━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┛"]
     BoardHeight = len(BoardStringList)
     BoardWidth = len(BoardStringList[0])
-    BoardLocation: list[int] = [((Height-7 - BoardHeight)/2)+7, (Width-BoardWidth) / 2]
-    TeleportCursor(BoardLocation[0], BoardLocation[1])
+    BoardLocationHight: int = int((Height-7 - BoardHeight)/2)+7
+    BoardLocationWidth: int = int((Width-BoardWidth) / 2)
+    TeleportCursor(BoardLocationHight, BoardLocationWidth)
     for idx, BoardString in enumerate(BoardStringList):
-        TeleportCursor(((Height-7 - BoardHeight)/2)+7 + idx, (Width-BoardWidth) / 2)
+        TeleportCursor(BoardLocationHight + idx, BoardLocationWidth)
         print(COLOR_BLUE + BoardString, end="")
     TeleportCursor(Height-1,Width)
 
@@ -607,9 +637,10 @@ def RenderSuperBoard(Width: int, Height: int) -> list[list[list[int]]]:
         return [[x + x_offset, y + y_offset] for x, y in base_board]
     
     # index all locations by board and hardcoded ofsets
-    Board1Location: list[list[int]] = [[BoardLocation[0]+2, BoardLocation[1]+4],[BoardLocation[0]+2, BoardLocation[1]+4+4],[BoardLocation[0]+2, BoardLocation[1]+4+8],
-                                       [BoardLocation[0]+2+2, BoardLocation[1]+4],[BoardLocation[0]+2+2, BoardLocation[1]+4+4],[BoardLocation[0]+2+2, BoardLocation[1]+4+8],
-                                       [BoardLocation[0]+2+4, BoardLocation[1]+4],[BoardLocation[0]+2+4, BoardLocation[1]+4+4],[BoardLocation[0]+2+4, BoardLocation[1]+4+8]]
+    Board1Location: list[list[int]] = [[BoardLocationHight+2, BoardLocationWidth+4],[BoardLocationHight+2, BoardLocationWidth+4+4],[BoardLocationHight+2, BoardLocationWidth+4+8],
+                                       [BoardLocationHight+2+2, BoardLocationWidth+4],[BoardLocationHight+2+2, BoardLocationWidth+4+4],[BoardLocationHight+2+2, BoardLocationWidth+4+8],
+                                       [BoardLocationHight+2+4, BoardLocationWidth+4],[BoardLocationHight+2+4, BoardLocationWidth+4+4],[BoardLocationHight+2+4, BoardLocationWidth+4+8]]
+    
     Board2Location = offset_board_locations(Board1Location, y_offset=16)
     Board3Location = offset_board_locations(Board2Location, y_offset=16)
 
@@ -704,8 +735,8 @@ def GameMode1(Screen_width, Screen_Height):
     Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
 
     # players board state
-    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
-    Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Player1: list[bool] = [False]*9
+    Player2: list[bool] = [False]*9
     Round: int = 0
     for x in range(9):
         Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
@@ -795,8 +826,8 @@ def GameMode3(Screen_width, Screen_Height):
     Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
 
     # players board state
-    Player1: list[bool] = [False, False, False, False, False, False, False, False, False]
-    Bot: list[bool] = [False, False, False, False, False, False, False, False, False]
+    Player1: list[bool] = [False]*9
+    Bot: list[bool] = [False]*9
     Round: int = 0
     
     # limits the game mode 2 logic to 6 rounds... 
@@ -896,7 +927,10 @@ def GameMode3(Screen_width, Screen_Height):
 
 
 def AskBoardToUse(Spaces: list[int], BoardLocations: list[list[list[int]]], Width: int, Height: int) -> int:
-    OutputLocation = (BoardLocations[0][0][0]-7)/2+7
+    """
+    This is like normal input while loop. 
+    """
+    OutputLocation = int((BoardLocations[0][0][0]-7)/2+7)
     TeleportCursor(OutputLocation, BoardLocations[0][0][0] - 2)
     print("(q for quit) Please Pick a Board Number to Start ", end="")
     for x in Spaces:
@@ -916,7 +950,7 @@ def AskBoardToUse(Spaces: list[int], BoardLocations: list[list[list[int]]], Widt
     return int(Choise)
 
 
-def HighLightBoardSpace(BoardNumber: int, BoardLocations: list[list[list[int]]], Width: int, Height: int):
+def HighLightBoardSpace(Show: bool, BoardNumber: int, BoardLocations: list[list[list[int]]], Width: int, Height: int):
     CornerLocationY, CornerLocationX = BoardLocations[BoardNumber-1][0]
     # ofsets from frist space normal number location to the innner board location
     CornerLocationY = CornerLocationY - 1
@@ -933,63 +967,51 @@ def HighLightBoardSpace(BoardNumber: int, BoardLocations: list[list[list[int]]],
         "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
         "└───┴───┴───┘"]
     for idx, string in enumerate(InnerBoard):
-        print(COLOR_YELLOW, end="")
+        if Show:
+            print(COLOR_YELLOW, end="")
+        else:
+            print(COLOR_BLUE, end="")
         TeleportCursor(CornerLocationY + idx, CornerLocationX)
         print(string, end="")
         print(COLOR_BLUE)
-
-    OtherBoards = [1,2,3,4,5,6,7,8,9]
-    OtherBoards.remove(BoardNumber)
-    
-    for otherboard in OtherBoards:
-        CLocationY, CLocationX = BoardLocations[otherboard-1][0]
-        # ofsets from frist space normal number location to the innner board location
-        CLocationY = CLocationY - 1
-        CLocationX = CLocationX - 2
-        for idx, string in enumerate(InnerBoard):
-            print(COLOR_BLUE, end="")
-            TeleportCursor(CLocationY + idx, CLocationX)
-            print(string, end="")
     
 
 
 def GameMode4(Screen_width, Screen_Height):
+    BigO = ["     ____    ",
+            "    / __ \   ",
+            "   | |  | |  ",
+            "   | |  | |  ",
+            "   | |__| |  ",
+            "    \____/   ",
+            "             "]
+    BigX = ["   __   __   ",
+            "   \ \ / /   ",
+            "    \ V /    ",
+            "     > <     ",
+            "    / . \    ",
+            "   /_/ \_\   ",
+            "             "]
+    BTie = ["             ",
+            "             ",
+            "┌───────────┐",
+            "└───────────┘",
+            "             ",
+            "             ",
+            "             "]
     # Returns the terminal cursor locations, first list is alll board, then 9 spaces and a list with 2 times, x and y...
     BoardLocations: list[list[list[int]]] = RenderSuperBoard(Screen_width, Screen_Height)
 
     Boards: list[int] = [1,2,3,4,5,6,7,8,9]
-    BoardSpaces: list[list[int]] = [[1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9],
-                               [1,2,3,4,5,6,7,8,9]]
+    BoardSpaces: list[list[int]] = [[1, 2, 3, 4, 5, 6, 7, 8, 9] for _ in range(9)] # makes list with 9 list with 1,2..9 in them
 
         # super players board state, info https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe
         # 3x3 for each 3x3 
-    PlayerBoardWin1 = [False, False, False, False, False, False, False, False, False]
-    Player1: list[bool] = [[False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False]]
-    PlayerBoardWin2 = [False, False, False, False, False, False, False, False, False]
-    Player2: list[bool] = [[False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False],
-                            [False, False, False, False, False, False, False, False, False]]
+    PlayerBoardWin1 = [False for _ in range(9)] # 9 False values
+    Player1: list[bool] = [[False for _ in range(9)] for _ in range(9)] # list of 9 list with 9 False values in them
+    PlayerBoardWin2 = [False for _ in range(9)] # 9 False values
+    Player2: list[bool] = [[False for _ in range(9)] for _ in range(9)] # list of 9 list with 9 False values in them
+    PlayerBoardTie = [False for _ in range(9)] # 9 False values
     CurrentSelectedBoard: int
     HaveNoBoardSlected: bool = False
     Round: int = 0
@@ -999,28 +1021,93 @@ def GameMode4(Screen_width, Screen_Height):
             CurrentSelectedBoard = BoardChoise
         Spaces = BoardSpaces[CurrentSelectedBoard-1]
         SubBoardLocations = BoardLocations[CurrentSelectedBoard-1]
-        HighLightBoardSpace(CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
-        Choise = AskForMove(Spaces, SubBoardLocations, Screen_width, Screen_Height)
+        HighLightBoardSpace(True, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
+        Choise = AskForMove(Spaces, BoardLocations[0], Screen_width, Screen_Height)
+        BoardSpaces[CurrentSelectedBoard-1].remove(Choise)
         Player: list[bool]
         Icon = ""
         if Round % 2 == 0:
+            LocationY = SubBoardLocations[Choise-1][0]
+            LocationX = SubBoardLocations[Choise-1][1]
+            TeleportCursor(LocationY, LocationX)
             Player = Player1[CurrentSelectedBoard-1]
             Icon = "X"
+            print(COLOR_RED + Icon, end="")
+            # Saves the player move, in the player which just got set to current board
+            Player[Choise-1] = True
+            win = CheckWinner(Player)
+            if win:
+                PlayerBoardWin1[CurrentSelectedBoard-1] = True
+                # some way to render the win
+                SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
+                SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
+                for idx, x in enumerate(BigX):
+                    TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
+                    print(x, end="")
+            else:
+                Tie: bool = True # just set here, but if not true. it will be changed in the next for loop
+                for idx in range(9):
+                    if Player1[CurrentSelectedBoard-1][idx] == False or Player2[CurrentSelectedBoard-1][idx] == False:
+                        Tie = False
+                if Tie == False:
+                    HighLightBoardSpace(False, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
+                else:
+                    PlayerBoardWin1[CurrentSelectedBoard-1] = True
+                    # some way to render the tie
+                    SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
+                    SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
+                    for idx, x in enumerate(BTie):
+                        TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
+                        print(x, end="")
+            win = CheckWinner(PlayerBoardWin1)
+            if win:
+                EndMessage("X Won", Screen_width, Screen_Height)
+                break
         else:
+            LocationY = SubBoardLocations[Choise-1][0]
+            LocationX = SubBoardLocations[Choise-1][1]
+            TeleportCursor(LocationY, LocationX)
             Player = Player2[CurrentSelectedBoard-1]
             Icon = "O"
-        Player[Choise-1] = True
-        LocationY = SubBoardLocations[Choise-1][0]
-        LocationX = SubBoardLocations[Choise-1][1]
-        TeleportCursor(LocationY, LocationX)
-        if Icon == "X": 
-            print(COLOR_RED + Icon, end="")
-        else:
             print(COLOR_GREEN + Icon, end="")
+            # Saves the player move, in the player which just got set to current board
+            Player[Choise-1] = True
+            win = CheckWinner(Player)
+            if win:
+                PlayerBoardWin2[CurrentSelectedBoard-1] = True
+                # some way to render the win
+                SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
+                SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
+                for idx, x in enumerate(BigO):
+                    TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
+                    print(x, end="")
+            else:
+                Tie: bool = True # just set here, but if not true. it will be changed in the next for loop
+                for idx in range(9):
+                    if Player1[CurrentSelectedBoard-1][idx] == False or Player2[CurrentSelectedBoard-1][idx] == False:
+                        Tie = False
+                if Tie == False:
+                    HighLightBoardSpace(False, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
+                else:
+                    PlayerBoardWin1[CurrentSelectedBoard-1] = True
+                    # some way to render the tie
+                    SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
+                    SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
+                    for idx, x in enumerate(BTie):
+                        TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
+                        print(x, end="")
+            win = CheckWinner(PlayerBoardWin2) # need to add all the tie things idk.
+            if win:
+                EndMessage("O Won", Screen_width, Screen_Height)
+                break
         # gives palyer new board
-        CurrentSelectedBoard = Choise
-        HaveNoBoardSlected = True
+        if PlayerBoardTie[Choise - 1] == True or PlayerBoardWin1[Choise - 1] == True or PlayerBoardWin2[Choise - 1] == True:
+            HaveNoBoardSlected = False
+        else:
+            CurrentSelectedBoard = Choise
+            HaveNoBoardSlected = True
         # incriment round
+
         Round = Round + 1
 
 
