@@ -91,27 +91,19 @@ def PrintCenter(StringList: list[str], Width, Height):
     TeleportCursor(Height-1,Width)
 
 
-def PromptUser(Options: list[int], Location, Query: str):
-    """
-    Genaric way to ask for move, fro diffrent modes. Its going to be a gloified while
-    This could replace 3 function
-    """
-    pass
-
-
-def AskForMove(Spaces: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
+def AskForMove(Query: str, Options: list[int], BoardLoacations: list[list[int]], Width: int, Height: int) -> int:
     """
     This prompts the users for what place a piece should be placed on.
     the locatin of the prompt is bassed on the first board space location 
     """
     OutputLocation = int((BoardLoacations[0][0]-7)/2+7)
     TeleportCursor(OutputLocation, BoardLoacations[0][1])
-    print("(q for quit) Please Pick a Space... ", end="")
-    for x in Spaces:
+    print(Query, end="")
+    for x in Options:
         print(str(x) + ", ", end="")
     while True:
         Choise = input("\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1]) +": " + (" " * int(Width - BoardLoacations[0][1] - 2))+ "\033[%d;%dH" % (OutputLocation+1, BoardLoacations[0][1] + 2))
-        StringSpaces = map(str, Spaces)
+        StringSpaces = map(str, Options)
         if Choise in StringSpaces:
             break
         if Choise == "q":
@@ -212,6 +204,10 @@ def MiniMaxAlgo(BotSpaces: list[bool], Player: list[bool]) -> int:
     
     return SumScore
 
+def MiniMaxAlgoSuper(BotSpaces: list[list[bool]], Player: list[list[bool]]) -> int:
+    # algo for the super tic tiac toe mode... dont have time.. 
+    pass
+
 
 def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLocation: int, Height, Width:int):
     ArtList = []
@@ -279,8 +275,8 @@ def OptionMenu(Width: int, Height: int) -> int:
         QuestionList = [
         "Play with another human, assuming you actually have friends, lol. ",
         "Challenge a bot, because... friends? Not really your thing? ",
-        'Three pieces, you´ll need to exchange pieces to secure your victory.',
-        "Super Tic-Tac-Toe, so you think you're a genius now? (not done)",
+        'Three pieces, you´ll need to exchange pieces to secure your victory. (buggy)',
+        "Super Tic-Tac-Toe, so you think you're a genius now?",
         "Looking for an escape route already? "]
         QuestionListMaker = [COLOR_BLUE +"[" + COLOR_LIGHT_RED + "1" + COLOR_BLUE + "]", 
                              COLOR_BLUE +"[" + COLOR_LIGHT_RED + "2" + COLOR_BLUE + "]",
@@ -289,7 +285,7 @@ def OptionMenu(Width: int, Height: int) -> int:
                              COLOR_BLUE +"[" + COLOR_LIGHT_RED + "Q" + COLOR_BLUE + "]"]
 
         # This len is done to the index of the longest string
-        Longest = len(QuestionList[0]) + 2
+        Longest = len(QuestionList[2]) + 2
         LongestFirstLocationX = int((Width - Longest)/2)
 
         TeleportCursor(9,int((Width-5)/2))
@@ -324,10 +320,10 @@ def OptionMenu(Width: int, Height: int) -> int:
             print( COLOR_LIGHT_PURPLE +"Machine Mode" + COLOR_BLUE, end="")
             return 2
         elif Answer == "3":
-            print(COLOR_LIGHT_PURPLE + "Three Piece Swap " + COLOR_BLUE, end="")
+            print(COLOR_LIGHT_PURPLE + "Three Piece Swap (Bugs)" + COLOR_BLUE, end="")
             return 3
         elif Answer == "4":
-            print(COLOR_LIGHT_PURPLE + "Super Mode, Bot (not done)" + COLOR_BLUE, end="")
+            print(COLOR_LIGHT_PURPLE + "Super Mode, Bot" + COLOR_BLUE, end="")
             return 4
         elif Answer == "q":
             print("noob")
@@ -738,19 +734,19 @@ def GameMode1(Screen_width, Screen_Height):
     Player1: list[bool] = [False]*9
     Player2: list[bool] = [False]*9
     Round: int = 0
+    Icon: str = "O"
     for x in range(9):
-        Choise = AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height)
-        Choise = int(Choise)
-        # assuming that the value excict other could not be chosen, in AskForMove
-        Spaces.remove(int(Choise))
         Player: list[bool]
-        Icon: str = "O"
         if Round % 2 == 0:
             Icon = "x"
             Player = Player1
         else:
             Icon = "O"
             Player = Player2
+        Choise = AskForMove("(q for quit) '" + Icon  + "' Please Pick a Space... ", Spaces, BoardLocation, Screen_width, Screen_Height)
+        Choise = int(Choise)
+        # assuming that the value excict other could not be chosen, in AskForMove
+        Spaces.remove(int(Choise))
         Player[Choise-1] = True
         RenderSelection(Choise, Icon, BoardLocation)
         TeleportCursor(Screen_Height-1, Screen_width)
@@ -775,9 +771,17 @@ def GameMode2(Screen_width: int, Screen_Height: int):
     Player2: list[bool] = [False, False, False, False, False, False, False, False, False]
 
     Round: int = 0
+    Icon: str = "X"
     for _ in range(9):
+        Player: list[bool]
         if Round % 2 == 0:
-            Choise = int(AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height))
+            Icon = "x"
+            Player = Player1
+        else:
+            Icon = "O"
+            Player = Player2
+        if Round % 2 == 0:
+            Choise = int(AskForMove("(q for quit) '" + Icon  + "' Please Pick a Space... ", Spaces, BoardLocation, Screen_width, Screen_Height))
         else:
             # move with a algo
             Scores: list[int] = []
@@ -798,14 +802,6 @@ def GameMode2(Screen_width: int, Screen_Height: int):
             Choise = BestSpace
         # assuming that the value excict other could not be chosen, in AskForMove
         Spaces.remove(int(Choise))
-        Player: list[bool]
-        Icon: str = "O"
-        if Round % 2 == 0:
-            Icon = "x"
-            Player = Player1
-        else:
-            Icon = "O"
-            Player = Player2
         Player[Choise-1] = True
         RenderSelection(Choise, Icon, BoardLocation)
         TeleportCursor(Screen_Height-1, Screen_width)
@@ -833,7 +829,7 @@ def GameMode3(Screen_width, Screen_Height):
     # limits the game mode 2 logic to 6 rounds... 
     for x in range(6):
         if Round % 2 == 0:
-            Choise = int(AskForMove(Spaces, BoardLocation, Screen_width, Screen_Height))
+            Choise = int(AskForMove("(q for quit) Please Pick a Space... ", Spaces, BoardLocation, Screen_width, Screen_Height))
         else:
             # move with a algo
             Scores: list[int] = []
@@ -901,7 +897,8 @@ def GameMode3(Screen_width, Screen_Height):
                 BoardLocationsTo.append(x + 1) # convert from index to real(index start from 0, not 1)
 
         if Round % 2 == 0:
-            FromLocation, ToLocation = AskSwap(BoardLocationsFrom, BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
+            FromLocation = AskForMove("Please Pick a Space To Move From ", BoardLocationsFrom, BoardLocation, Screen_width, Screen_Height)
+            ToLocation = AskForMove("Please Pick a Space To Move to ", BoardLocationsTo, BoardLocation, Screen_width, Screen_Height)
         else:
             ## need some random var to decide, where to move from and to...
             time = int(os.times().elapsed*100)
@@ -924,30 +921,6 @@ def GameMode3(Screen_width, Screen_Height):
                 EndMessage("Bot Won", Screen_width, Screen_Height)
             exit()
         Round = Round + 1
-
-
-def AskBoardToUse(Spaces: list[int], BoardLocations: list[list[list[int]]], Width: int, Height: int) -> int:
-    """
-    This is like normal input while loop. 
-    """
-    OutputLocation = int((BoardLocations[0][0][0]-7)/2+7)
-    TeleportCursor(OutputLocation, BoardLocations[0][0][0] - 2)
-    print("(q for quit) Please Pick a Board Number to Start ", end="")
-    for x in Spaces:
-        print(str(x) + ", ", end="")
-    while True:
-        Choise = input("\033[%d;%dH" % (OutputLocation, BoardLocations[0][0][0] - 2) +": " + (" " * int(Width - BoardLocations[0][0][0] - 2))+ "\033[%d;%dH" % (OutputLocation, BoardLocations[0][0][0] - 2))
-        StringSpaces = map(str, Spaces)
-        if Choise in StringSpaces:
-            break
-        if Choise == "q":
-            TeleportCursor(Height-1,Width)
-            exit(0)
-    # wipeping 
-    TeleportCursor(OutputLocation, 0)
-    print(" "*Width, end="")
-    TeleportCursor(Height-1, Width)
-    return int(Choise)
 
 
 def HighLightBoardSpace(Show: bool, BoardNumber: int, BoardLocations: list[list[list[int]]], Width: int, Height: int):
@@ -1008,24 +981,25 @@ def GameMode4(Screen_width, Screen_Height):
         # super players board state, info https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe
         # 3x3 for each 3x3 
     PlayerBoardWin1 = [False for _ in range(9)] # 9 False values
-    Player1: list[bool] = [[False for _ in range(9)] for _ in range(9)] # list of 9 list with 9 False values in them
+    Player1: list[list[int]] = [[False for _ in range(9)] for _ in range(9)] # list of 9 list with 9 False values in them
     PlayerBoardWin2 = [False for _ in range(9)] # 9 False values
-    Player2: list[bool] = [[False for _ in range(9)] for _ in range(9)] # list of 9 list with 9 False values in them
+    Player2: list[list[int]] = [[False for _ in range(9)] for _ in range(9)] # list of 9 list with 9 False values in them
     PlayerBoardTie = [False for _ in range(9)] # 9 False values
     CurrentSelectedBoard: int
     HaveNoBoardSlected: bool = False
     Round: int = 0
+    Icon = "X"
     while True: # Cant be sure how many rounds it will take, to finish a game...
         if HaveNoBoardSlected == False:
-            BoardChoise = AskBoardToUse(Boards, BoardLocations, Screen_width, Screen_Height)
+            BoardChoise = AskForMove("(q for quit) '" + Icon  + "' Please Pick a Board... ", Boards, BoardLocations[0], Screen_width, Screen_Height)
             CurrentSelectedBoard = BoardChoise
         Spaces = BoardSpaces[CurrentSelectedBoard-1]
         SubBoardLocations = BoardLocations[CurrentSelectedBoard-1]
         HighLightBoardSpace(True, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
-        Choise = AskForMove(Spaces, BoardLocations[0], Screen_width, Screen_Height)
+        Choise = AskForMove("(q for quit) '" + Icon  + "' Please Pick a Space... ", Spaces, BoardLocations[0], Screen_width, Screen_Height)
+        HighLightBoardSpace(False, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
         BoardSpaces[CurrentSelectedBoard-1].remove(Choise)
         Player: list[bool]
-        Icon = ""
         if Round % 2 == 0:
             LocationY = SubBoardLocations[Choise-1][0]
             LocationX = SubBoardLocations[Choise-1][1]
@@ -1045,24 +1019,21 @@ def GameMode4(Screen_width, Screen_Height):
                     TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
                     print(x, end="")
             else:
-                Tie: bool = True # just set here, but if not true. it will be changed in the next for loop
-                for idx in range(9):
-                    if Player1[CurrentSelectedBoard-1][idx] == False or Player2[CurrentSelectedBoard-1][idx] == False:
-                        Tie = False
-                if Tie == False:
-                    HighLightBoardSpace(False, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
-                else:
+                if len(BoardSpaces[CurrentSelectedBoard-1]) == 0:
                     PlayerBoardWin1[CurrentSelectedBoard-1] = True
                     # some way to render the tie
                     SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
                     SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
                     for idx, x in enumerate(BTie):
+                        print(COLOR_YELLOW, end="")
                         TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
                         print(x, end="")
+                    print(COLOR_LIGHT_BLUE, end="")
             win = CheckWinner(PlayerBoardWin1)
             if win:
                 EndMessage("X Won", Screen_width, Screen_Height)
                 break
+            Icon = "O"
         else:
             LocationY = SubBoardLocations[Choise-1][0]
             LocationX = SubBoardLocations[Choise-1][1]
@@ -1082,14 +1053,8 @@ def GameMode4(Screen_width, Screen_Height):
                     TeleportCursor(SubBoardLocationHeight + idx, SubBoardLocationWidth)
                     print(x, end="")
             else:
-                Tie: bool = True # just set here, but if not true. it will be changed in the next for loop
-                for idx in range(9):
-                    if Player1[CurrentSelectedBoard-1][idx] == False or Player2[CurrentSelectedBoard-1][idx] == False:
-                        Tie = False
-                if Tie == False:
-                    HighLightBoardSpace(False, CurrentSelectedBoard, BoardLocations, Screen_width, Screen_Height)
-                else:
-                    PlayerBoardWin1[CurrentSelectedBoard-1] = True
+                if len(BoardSpaces[CurrentSelectedBoard-1]) == 0:
+                    PlayerBoardWin2[CurrentSelectedBoard-1] = True
                     # some way to render the tie
                     SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
                     SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
@@ -1100,6 +1065,7 @@ def GameMode4(Screen_width, Screen_Height):
             if win:
                 EndMessage("O Won", Screen_width, Screen_Height)
                 break
+            Icon = "X"
         # gives palyer new board
         if PlayerBoardTie[Choise - 1] == True or PlayerBoardWin1[Choise - 1] == True or PlayerBoardWin2[Choise - 1] == True:
             HaveNoBoardSlected = False
