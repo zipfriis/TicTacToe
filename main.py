@@ -1012,6 +1012,7 @@ def GameMode4(Screen_width, Screen_Height):
             win = CheckWinner(Player)
             if win:
                 PlayerBoardWin1[CurrentSelectedBoard-1] = True
+                Boards.remove(CurrentSelectedBoard)
                 # some way to render the win
                 SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
                 SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
@@ -1021,6 +1022,7 @@ def GameMode4(Screen_width, Screen_Height):
             else:
                 if len(BoardSpaces[CurrentSelectedBoard-1]) == 0:
                     PlayerBoardWin1[CurrentSelectedBoard-1] = True
+                    Boards.remove(CurrentSelectedBoard)
                     # some way to render the tie
                     SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
                     SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
@@ -1046,6 +1048,7 @@ def GameMode4(Screen_width, Screen_Height):
             win = CheckWinner(Player)
             if win:
                 PlayerBoardWin2[CurrentSelectedBoard-1] = True
+                Boards.remove(CurrentSelectedBoard)
                 # some way to render the win
                 SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
                 SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
@@ -1055,6 +1058,7 @@ def GameMode4(Screen_width, Screen_Height):
             else:
                 if len(BoardSpaces[CurrentSelectedBoard-1]) == 0:
                     PlayerBoardWin2[CurrentSelectedBoard-1] = True
+                    Boards.remove(CurrentSelectedBoard)
                     # some way to render the tie
                     SubBoardLocationHeight = SubBoardLocations[0][0] - 1 # top left corner location of subboard
                     SubBoardLocationWidth = SubBoardLocations[0][1] - 2 # top left corner location of subboard
