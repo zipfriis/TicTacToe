@@ -14,6 +14,7 @@
 # This import is simple, and get used ones... it enables the program to know the size of the console screen..
 # the os module is part of python core lib, and nothing is needed to be installed. 
 import os  # only get used for:     os.get_terminal_size().columns     and     os.get_terminal_size().lines
+import keyboard # type: ignore # makes it ez to make a key logger.
 
 COLOR_RED="\033[0;31m"
 COLOR_GREEN="\033[0;32m"
@@ -268,6 +269,56 @@ def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLo
 
 
 def OptionMenu(Width: int, Height: int) -> int:
+    # Game Mode Cards
+    GameMode1TitleCard: list[str] = ["┏━━━━━━━━━━━━━━━━━━━━━┓",
+                                     "┃     Friend Mode     ┃",
+                                     "┃    ‾‾‾‾‾‾‾‾‾‾‾‾‾    ┃",
+                                     "┃    ┌───┬───┬───┐    ┃",
+                                     "┃    │ ◯ │   │ ◯ │    ┃",
+                                     "┃    ├───┼───┼───┤    ┃",
+                                     "┃    │ x │ x │ x │    ┃",
+                                     "┃    ├───┼───┼───┤    ┃",
+                                     "┃    │ ◯ │ ◯ │ x │    ┃",
+                                     "┃    └───┴───┴───┘    ┃",
+                                     "┃                     ┃",
+                                     "┗━━━━━━━━━━━━━━━━━━━━━┛"]
+    GameMode2TitleCard: list[str] = ["┏━━━━━━━━━━━━━━━━━━━━━┓",
+                                     "┃    Machine Mode     ┃",
+                                     "┃   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾    ┃",
+                                     "┃    ┌───┬───┬───┐    ┃",
+                                     "┃    │ ◯ │ x │ x │    ┃",
+                                     "┃    ├───┼───┼───┤    ┃",
+                                     "┃    │ x │ x │ ◯ │    ┃",
+                                     "┃    ├───┼───┼───┤    ┃",
+                                     "┃    │ ◯ │ ◯ │ ◯ │    ┃",
+                                     "┃    └───┴───┴───┘    ┃",
+                                     "┃                     ┃",
+                                     "┗━━━━━━━━━━━━━━━━━━━━━┛"]
+    GameMode3TitleCard: list[str] = ["┏━━━━━━━━━━━━━━━━━━━━━┓",
+                                     "┃  Three Piece Mode   ┃",
+                                     "┃ ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾  ┃",
+                                     "┃    ┌───┬───┬───┐    ┃",
+                                     "┃    │ ◯ │   │ ◯ │    ┃",
+                                     "┃    ├───┼───┼───┤    ┃",
+                                     "┃    │ x │ x │ x │    ┃",
+                                     "┃    ├───┼───┼───┤    ┃",
+                                     "┃    │ ◯ │   │   │    ┃",
+                                     "┃    └───┴───┴───┘    ┃",
+                                     "┃                     ┃",
+                                     "┗━━━━━━━━━━━━━━━━━━━━━┛"]
+    GameMode4TitleCard: list[str] = ["┏━━━━━━━━━━━━━━━━━━━━━┓",
+                                     "┃      Super Mode     ┃",
+                                     "┃     ‾‾‾‾‾‾‾‾‾‾‾‾    ┃",
+                                     "┃  ─┼─┼─│─┼─┼─│─┼─┼─  ┃",
+                                     "┃  ─┼─┼─│─┼─┼─│─┼─┼─  ┃",
+                                     "┃  ─────┼─────┼─────  ┃",
+                                     "┃  ─┼─┼─│─┼─┼─│─┼─┼─  ┃",
+                                     "┃  ─┼─┼─│─┼─┼─│─┼─┼─  ┃",
+                                     "┃  ─────┼─────┼─────  ┃",
+                                     "┃  ─┼─┼─│─┼─┼─│─┼─┼─  ┃",
+                                     "┃  ─┼─┼─│─┼─┼─│─┼─┼─  ┃",
+                                     "┗━━━━━━━━━━━━━━━━━━━━━┛"]
+
     # This loops until player deside to player ither by another person or internal bot
     while True:
         WipeScreen(7)
