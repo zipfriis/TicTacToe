@@ -14,6 +14,9 @@
 # This import is simple, and get used ones... it enables the program to know the size of the console screen..
 # the os module is part of python core lib, and nothing is needed to be installed. 
 import os  # only get used for:     os.get_terminal_size().columns     and     os.get_terminal_size().lines
+import sys
+import termios
+import tty
 
 COLOR_RED="\033[0;31m"
 COLOR_GREEN="\033[0;32m"
@@ -27,6 +30,29 @@ COLOR_LIGHT_PURPLE="\033[1;35m"
 COLOR_BOLD = "\033[1m"
 COLOR_RESET = "\033[0m"
 
+K_RIGHT = b'\x1b[C'
+K_LEFT  = b'\x1b[D'
+K_UP = b'\x1b[A'
+K_DOWN  = b'\x1b[B'
+K_ENTER = b'\n'
+
+def read_keys():
+  stdin = sys.stdin.fileno()
+  tattr = termios.tcgetattr(stdin)
+  try:
+    tty.setcbreak(stdin, termios.TCSANOW)
+    while True:
+        ch = sys.stdin.buffer.read1()
+        if ch == '\x1b':
+            ch += sys.stdin.read(2)
+        yield ch
+
+  except KeyboardInterrupt:
+    yield None
+  finally:
+    termios.tcsetattr(stdin, termios.TCSANOW, tattr)
+
+
 def TeleportCursor(y: int , x: int):
     """
     This fucntion allows the program to move the cursor. 
@@ -39,7 +65,8 @@ def TeleportCursor(y: int , x: int):
     print("\033[%d;%dH" % (y, x), end="")
 
 
-def MoveCursor(x, y) -> str:
+
+def MoveCursor(x = 0, y = 0) -> str:
     """
     This function make a way to move cursor, without placing any chars.
 
@@ -212,49 +239,49 @@ def MiniMaxAlgoSuper(BotSpaces: list[list[bool]], Player: list[list[bool]]) -> i
 def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLocation: int, Height, Width:int):
     ArtList = []
     if HeightLimit > 14:
-        StringList: list[str] = ["            .'              ",
-                                 "           .-~<             ",
-                                 "        __/    > -'         ",
-                                 "      -~ ___--/             ",
-                                 "     /_//     \__           ",
-                                 "    '            \          ",
-                                 "    |          __/          ",
-                                 "   |O        |    .__,--_   ",
-                                 "    )        / d  . _>   /. ",
-                                 "   \       /.._  .)    <    ",
-                                 "    `     |<   \  `-.__/    ",
-                                 "    |    /  \__//.--...<|   ",
-                                 "    '-.__\\  - ' '--~|      "]
+        StringList: list[str] = [r"            .'              ",
+                                 r"           .-~<             ",
+                                 r"        __/    > -'         ",
+                                 r"      -~ ___--/             ",
+                                 r"     /_//     \__           ",
+                                 r"    '            \          ",
+                                 r"    |          __/          ",
+                                 r"   |O        |    .__,--_   ",
+                                 r"    )        / d  . _>   /. ",
+                                 r"   \       /.._  .)    <    ",
+                                 r"    `     |<   \  `-.__/    ",
+                                 r"    |    /  \__//.--...<|   ",
+                                 r"    '-.__\\  - ' '--~|      "]
         ArtList.append(StringList)
     if HeightLimit > 16:
-        StringList: list[str] = ["                                                 *******                ",
-                                 "                                 ~             *---*******              ",
-                                 "                                ~             *-----*******             ",
-                                 "                         ~                   *-------*******            ",
-                                 "                        __      _   _!__     *-------*******            ",
-                                 "                   _   /  \_  _/ \  |::| ___ **-----********   ~        ",
-                                 "                 _/ \_/^    \/   ^\/|::|\|:|  **---*****/^\_            ",
-                                 "              /\/  ^ /  ^    / ^ ___|::|_|:|_/\_******/  ^  \           ",
-                                 "             /  \  _/ ^ ^   /    |::|--|:|---|  \__/  ^     ^\___       ",
-                                 "           _/_^  \/  ^    _/ ^   |::|::|:|-::| ^ /_  ^    ^  ^   \_     ",
-                                 "          /   \^ /    /\ /       |::|--|:|:--|  /  \        ^      \    ",
-                                 "         /     \/    /  /        |::|::|:|:-:| / ^  \  ^      ^     \   ",
-                                 "   _Q   / _Q  _Q_Q  / _Q    _Q   |::|::|:|:::|/    ^ \   _Q      ^      ",
-                                 '  /_\)   /_\)/_/\\)  /_\)  /_\)  |::|::|:|:::|          /_\)            ',
-                                 '_O|/O___O|/O_OO|/O__O|/O__O|/O__________________________O|/O_"_________ ',
-                                 "//////////////////////////////////////////////////////////////////////  "]
+        StringList: list[str] = [r'                                                 *******                ',
+                                 r"                                 ~             *---*******              ",
+                                 r"                                ~             *-----*******             ",
+                                 r"                         ~                   *-------*******            ",
+                                 r"                        __      _   _!__     *-------*******            ",
+                                 r"                   _   /  \_  _/ \  |::| ___ **-----********   ~        ",
+                                 r"                 _/ \_/^    \/   ^\/|::|\|:|  **---*****/^\_            ",
+                                 r"              /\/  ^ /  ^    / ^ ___|::|_|:|_/\_******/  ^  \           ",
+                                 r"             /  \  _/ ^ ^   /    |::|--|:|---|  \__/  ^     ^\___       ",
+                                 r"           _/_^  \/  ^    _/ ^   |::|::|:|-::| ^ /_  ^    ^  ^   \_     ",
+                                 r"          /   \^ /    /\ /       |::|--|:|:--|  /  \        ^      \    ",
+                                 r"         /     \/    /  /        |::|::|:|:-:| / ^  \  ^      ^     \   ",
+                                 r'   _Q   / _Q  _Q_Q  / _Q    _Q   |::|::|:|:::|/    ^ \   _Q      ^      ',
+                                 r'  /_\)   /_\)/_/\\)  /_\)  /_\)  |::|::|:|:::|          /_\)            ',
+                                 r'_O|/O___O|/O_OO|/O__O|/O__O|/O__________________________O|/O_"_________ ',
+                                 r"//////////////////////////////////////////////////////////////////////  "]
         ArtList.append(StringList)
     if HeightLimit > 10:
-        StringList: list[str] = ["  ◌                             ◌                                       ◌              ",
-                                 "                                             ‧₊ *:･ﾟ彡       ◌                 ☽︎       ◌",
-                                 "               ◌                                 ✩彡 ･ﾟ *:                              ",
-                                 "                              ◌                                        ◌                ",
-                                 "◌                                                                                       ",
-                                 "                                                  ♡                                     ",
-                                 "                                            (\_(\    /)_/)                              ",
-                                 "                                            (    )  (    )                              ",
-                                 "                                           ૮/ʚɞ  |ა ૮|  ʚɞ\ა                            ",
-                                 "                                           ( ◌   |   |   ◌ )                            "]
+        StringList: list[str] = [r"  ◌                             ◌                                       ◌              ",
+                                 r"                                             ‧₊ *:･ﾟ彡       ◌                 ☽︎       ◌",
+                                 r"               ◌                                 ✩彡 ･ﾟ *:                              ",
+                                 r"                              ◌                                        ◌                ",
+                                 r"◌                                                                                       ",
+                                 r"                                                  ♡                                     ",
+                                 r"                                            (\_(\    /)_/)                              ",
+                                 r"                                            (    )  (    )                              ",
+                                 r"                                           ૮/ʚɞ  |ა ૮|  ʚɞ\ა                            ",
+                                 r"                                           ( ◌   |   |   ◌ )                            "]
         ArtList.append(StringList)
     StringHeight = len(StringList)
     print(COLOR_YELLOW)
@@ -266,70 +293,87 @@ def RenderRandomBottomArt(HeightLimit: int, WidthLimit: int, YLocation: int, XLo
         print(x, end="")
 
 
-
-def OptionMenu(Width: int, Height: int) -> int:
+def OptionMenu(Width: int, Height: int) -> callable: # solve the finction of given game mode selected
     # This loops until player deside to player ither by another person or internal bot
-    while True:
-        WipeScreen(7)
-        print(COLOR_BLUE, end="")
-        QuestionList = [
+    WipeScreen(7)
+    print(COLOR_BLUE, end="", flush=True)
+    QuestionList = [
         "Play with another human, assuming you actually have friends, lol. ",
         "Challenge a bot, because... friends? Not really your thing? ",
         'Three pieces, you´ll need to exchange pieces to secure your victory. (buggy)',
         "Super Tic-Tac-Toe, so you think you're a genius now?",
         "Looking for an escape route already? "]
-        QuestionListMaker = [COLOR_BLUE +"[" + COLOR_LIGHT_RED + "1" + COLOR_BLUE + "]", 
-                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "2" + COLOR_BLUE + "]",
-                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "3" + COLOR_BLUE + "]",
-                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "4" + COLOR_BLUE + "]",
-                             COLOR_BLUE +"[" + COLOR_LIGHT_RED + "Q" + COLOR_BLUE + "]"]
-
-        # This len is done to the index of the longest string
-        Longest = len(QuestionList[2]) + 2
-        LongestFirstLocationX = int((Width - Longest)/2)
-
-        TeleportCursor(9,int((Width-5)/2))
-        print(COLOR_BOLD + "Game Modes", end=COLOR_RESET+COLOR_BLUE)       
-        for idx, Question in enumerate(QuestionList):
-            TeleportCursor(idx + 10, LongestFirstLocationX)
-            print(Question, end="")
-        for idx, Maker in enumerate(QuestionListMaker):
-            TeleportCursor(idx + 10, LongestFirstLocationX + Longest)
-            print(Maker, end="")
-
-        # calculating what Space is left under the query... drawing ascii art.   
-        SpaceForArt = Height - idx+ 15
-        RenderRandomBottomArt(SpaceForArt, Width - 10, idx + 15, 5, Height, Width)
-       
-        print(COLOR_LIGHT_RED, end="")
-        TeleportCursor(idx+ 14, int((Width-10)/2))
-        print("‾‾‾‾‾‾‾‾‾‾‾‾", end="")
-        TeleportCursor(idx+ 13, int((Width-10)/2))
         
+    # This len is done to the index of the longest string
+    Longest = len(QuestionList[2]) + 2
+    LongestFirstLocationX = int((Width - Longest)/2)
 
-        # the program will stall here until the user have made some kind of input...
-        Answer = input("Pick one: ")
-        print(COLOR_BLUE, end="")
-        
-        WipeScreen(7)
-        TeleportCursor(Height,0)
-        if Answer == "1":
-            print( COLOR_LIGHT_PURPLE +"Friend Mode" + COLOR_BLUE, end="")
-            return 1
-        elif Answer == "2":
-            print( COLOR_LIGHT_PURPLE +"Machine Mode" + COLOR_BLUE, end="")
-            return 2
-        elif Answer == "3":
-            print(COLOR_LIGHT_PURPLE + "Three Piece Swap (Bugs)" + COLOR_BLUE, end="")
-            return 3
-        elif Answer == "4":
-            print(COLOR_LIGHT_PURPLE + "Super Mode, Bot" + COLOR_BLUE, end="")
-            return 4
-        elif Answer == "q":
-            print("noob")
-            exit(0)
-        # if the answer not valid, it will re-render the option menu
+        # printing the modes in middle. 
+    TeleportCursor(9,int((Width-5)/2))
+    print(COLOR_BOLD + "Game Modes", end=COLOR_RESET+COLOR_BLUE, flush=True)       
+    for idx, Question in enumerate(QuestionList):
+        TeleportCursor(idx + 10, LongestFirstLocationX)
+        print(Question, end="",  flush=True)
 
+    # instructinos
+    instructions = "Use Up/Down arrows and enter to select."
+    instructionsLocationX = int((Width - len(instructions))/2)
+    TeleportCursor(idx+ 13, instructionsLocationX) # hard coded 
+    print(instructions, end="", flush=True)
+
+    SpaceForArt = Height - idx+ 15
+    RenderRandomBottomArt(SpaceForArt, Width - 10, idx + 15, 5, Height, Width)
+
+    cursorY = 0
+    TeleportCursor(10, LongestFirstLocationX + Longest +2)
+    print("<", end="", flush=True)
+    # option key input
+    for k in read_keys():
+        #print(repr(k), flush=True)  # see exactly what Enter sends
+        if k == K_DOWN and cursorY < 4:
+            print(f"\033[{1}D" + " " + f"\033[{1}D", end="", flush=True)  # wipe
+            cursorY += 1
+            print(f"\033[{1}B", end="<", flush=True)  # move down, print cursor
+        elif k == K_UP and cursorY > 0:
+            print(f"\033[{1}D" + " " + f"\033[{1}D", end="", flush=True)  # wipe
+            cursorY -= 1
+            print(f"\033[{1}A", end="<", flush=True)  # move up, print cursor
+        elif k == K_ENTER:
+            if cursorY == 4:
+                exit(0) # close game
+            WipeScreen(7)
+            TeleportCursor(Height,0)
+            modes = ["Friend Mode","Machine Mode", "Three Piece Swap (Bugs)", "Super Mode"]
+            modesfunc = [FriendMode, MachineMode, MachineSwapMode, FriendSuperMode]
+            print( COLOR_LIGHT_PURPLE + modes[cursorY] + COLOR_BLUE, end="")
+            return modesfunc[cursorY] 
+
+
+def HighLightBoardSpace(Show: bool, BoardNumber: int, BoardLocations: list[list[list[int]]], Width: int, Height: int):
+    CornerLocationY, CornerLocationX = BoardLocations[BoardNumber-1][0]
+    # ofsets from frist space normal number location to the innner board location
+    CornerLocationY = CornerLocationY - 1
+    CornerLocationX = CornerLocationX - 2
+
+    # This is a String which will not overwrite the number written in the spaces...
+    # this become usefull if you like to change color of board but not the icons..
+    InnerBoard = [
+        "┌───┬───┬───┐",
+        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
+        "├───┼───┼───┤",
+        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
+        "├───┼───┼───┤",
+        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
+        "└───┴───┴───┘"]
+    for idx, string in enumerate(InnerBoard):
+        if Show:
+            print(COLOR_YELLOW, end="")
+        else:
+            print(COLOR_BLUE, end="")
+        TeleportCursor(CornerLocationY + idx, CornerLocationX)
+        print(string, end="")
+        print(COLOR_BLUE)
+    
 
 def EndMessage(Message: str, Width: int, Height: int):
     if Message == "X Won":
@@ -673,7 +717,7 @@ def PrintStartScreen(Width: int):
     WipeScreen(0)
     # after printing the string made above 
     print(WelcomeString, end="")
-    print('—' * Width, end="")
+    print('—' * Width)
 
 
 def TicTacToe():
@@ -682,7 +726,7 @@ def TicTacToe():
 
     if Screen_width < 95 or Screen_Height < 42:
         WipeScreen(0)
-        print("The game need 95 in width and 42 in height (close to square)")
+        print("The game needs 95 in width and 42 in height of terminal")
         print("Rezise and rerun... Thanks :)")
         text_list = [
             "To run this program, follow these simple steps:",
@@ -713,19 +757,11 @@ def TicTacToe():
     print(COLOR_CYAN, end="")
     
     GameMode: int # This int should only be 1,2,3,4 = freind, bot, swap friend, super tictactoe
-    GameMode = OptionMenu(Screen_width, Screen_Height)
-    # Print the size of terminal
-    if GameMode == 1:
-        GameMode1(Screen_width, Screen_Height)
-    elif GameMode == 2:
-        GameMode2(Screen_width, Screen_Height)
-    elif GameMode == 3:
-        GameMode3(Screen_width, Screen_Height)
-    elif GameMode == 4: # this game mode is not done
-        GameMode4(Screen_width, Screen_Height)
+    GameModeFunc = OptionMenu(Screen_width, Screen_Height)
+    GameModeFunc(Screen_width, Screen_Height)
 
 #  all the game modes a splitted up in functions. 
-def GameMode1(Screen_width, Screen_Height):
+def FriendMode(Screen_width, Screen_Height):
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
     Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
@@ -761,7 +797,7 @@ def GameMode1(Screen_width, Screen_Height):
     EndMessage("Tie", Screen_width, Screen_Height)       
 
 
-def GameMode2(Screen_width: int, Screen_Height: int):
+def MachineMode(Screen_width: int, Screen_Height: int):
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
     Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
@@ -816,7 +852,7 @@ def GameMode2(Screen_width: int, Screen_Height: int):
     EndMessage("Tie", Screen_width, Screen_Height)        
 
 
-def GameMode3(Screen_width, Screen_Height):
+def MachineSwapMode(Screen_width, Screen_Height):
     BoardLocation = RenderBoard(Screen_width, Screen_Height)
 
     Spaces: list[int] = [1,2,3,4,5,6,7,8,9]
@@ -922,35 +958,7 @@ def GameMode3(Screen_width, Screen_Height):
             exit()
         Round = Round + 1
 
-
-def HighLightBoardSpace(Show: bool, BoardNumber: int, BoardLocations: list[list[list[int]]], Width: int, Height: int):
-    CornerLocationY, CornerLocationX = BoardLocations[BoardNumber-1][0]
-    # ofsets from frist space normal number location to the innner board location
-    CornerLocationY = CornerLocationY - 1
-    CornerLocationX = CornerLocationX - 2
-
-    # This is a String which will not overwrite the number written in the spaces...
-    # this become usefull if you like to change color of board but not the icons..
-    InnerBoard = [
-        "┌───┬───┬───┐",
-        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
-        "├───┼───┼───┤",
-        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
-        "├───┼───┼───┤",
-        "│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│" + MoveCursor(3,0) +"│",
-        "└───┴───┴───┘"]
-    for idx, string in enumerate(InnerBoard):
-        if Show:
-            print(COLOR_YELLOW, end="")
-        else:
-            print(COLOR_BLUE, end="")
-        TeleportCursor(CornerLocationY + idx, CornerLocationX)
-        print(string, end="")
-        print(COLOR_BLUE)
-    
-
-
-def GameMode4(Screen_width, Screen_Height):
+def FriendSuperMode(Screen_width, Screen_Height):
     BigO = ["     ____    ",
             "    / __ \   ",
             "   | |  | |  ",
@@ -1080,7 +1088,21 @@ def GameMode4(Screen_width, Screen_Height):
 
         Round = Round + 1
 
+def print_sprite(x, y, height):
+    """Print sprite at (x, y), padding to consistent height."""
+    lines = []
+    for row in range(height):
+        if row == y:
+            lines.append(' ' * max(x, 0) + '@')
+        else:
+            lines.append('')
+    print('\n'.join(lines))
 
+def clear_sprite(height):
+    """Move cursor up `height` lines and clear each one."""
+    for _ in range(height):
+        sys.stdout.write('\033[F\033[K')
+    sys.stdout.flush()
 
 if __name__=="__main__":
     TicTacToe()
